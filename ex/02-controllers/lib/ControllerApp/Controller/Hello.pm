@@ -1,4 +1,4 @@
-package HelloApp::Controller::Hello;
+package ControllerApp::Controller::Hello;
 
 use v5.40;
 use Mooish::Base -standard;
