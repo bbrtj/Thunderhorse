@@ -53,7 +53,7 @@ async sub pagi ($self, $scope, $receive, $send)
 
 	my $res = $context->res;
 	foreach my $match (@matches) {
-		my $location = $router->find($match->location);
+		my $location = $match->location;
 
 		await $location->pagify($match->matched)->($scope, $receive, $send);
 		last if $res->rendered;

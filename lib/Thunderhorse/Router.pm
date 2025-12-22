@@ -4,7 +4,6 @@ use v5.40;
 use Mooish::Base -standard;
 
 use Thunderhorse::Router::Location;
-use Thunderhorse::Router::Match;
 
 extends 'Gears::Router';
 
@@ -13,15 +12,20 @@ has field 'controller' => (
 	writer => 1,
 );
 
+# external caches should have a L1 cache in front of it to map location names
+# to location objects
 has option 'cache' => (
 	isa => HasMethods ['get', 'set', 'clear'],
 );
 
+# cache for finding locations
 has field '_find_cache' => (
 	isa => HashRef,
 	default => sub { {} },
 );
 
+# id of the last route. All route building must be in deterministic order, so
+# that multiple forked processes can use the same external cached table
 has field '_last_route_id' => (
 	isa => PositiveOrZeroInt,
 	default => 0,
@@ -36,23 +40,17 @@ sub _build_location ($self, %args)
 	);
 }
 
-sub _build_match ($self, $location, $match_data)
-{
-	return Thunderhorse::Router::Match->new(
-		location => $location->name,
-		matched => $match_data,
-	);
-}
-
 sub _match_level ($self, $locations, @args)
 {
 	my @result = $self->SUPER::_match_level($locations, @args);
+
+	# optimization - very common to have just one match on a single level
 	return @result unless @result > 1;
 
 	return
 		map { $_->[0] }
 		sort { $a->[1] <=> $b->[1] }
-		map { [$_, ref eq 'ARRAY' ? $_->[0]->order : $_->order] }
+		map { [$_, (ref eq 'ARRAY' ? $_->[0] : $_)->location->order] }
 		@result;
 }
 

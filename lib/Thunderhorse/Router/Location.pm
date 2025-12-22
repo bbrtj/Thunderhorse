@@ -12,6 +12,7 @@ has option 'method' => (
 	isa => Str,
 );
 
+# TODO: ensure names are unique
 has param 'name' => (
 	isa => Str,
 	lazy => 1,
