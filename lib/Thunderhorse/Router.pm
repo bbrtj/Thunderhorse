@@ -47,6 +47,7 @@ sub _build_match ($self, $location, $match_data)
 sub _match_level ($self, $locations, @args)
 {
 	my @result = $self->SUPER::_match_level($locations, @args);
+	return @result unless @result > 1;
 
 	my $bridge = shift @result;
 	@result =
@@ -67,7 +68,8 @@ sub match ($self, $method, $path)
 	my $result = $self->cache->get($key);
 	return $result if $result;
 
-	$self->cache->set($key, $self->SUPER::match($path));
+	$result = $self->SUPER::match($path);
+	$self->cache->set($key, $result);
 	return $result;
 }
 
