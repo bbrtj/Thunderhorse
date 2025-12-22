@@ -40,7 +40,7 @@ $k_r->add('/z1' => {to => sub { }, bridge => 1})->add('/z2' => {to => sub { }});
 # print Dumper($k_r->match('/test/test2'));
 
 cmpthese 300.01, {
-	thunderhorse => sub { $th_r->flatten($th_r->match('/test/test2')) },
+	thunderhorse => sub { $th_r->flat_match('/test/test2') },
 	kelp => sub { $k_r->match('/test/test2') },
 };
 

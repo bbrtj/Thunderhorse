@@ -54,18 +54,28 @@ sub _match_level ($self, $locations, @args)
 		@result;
 }
 
-sub match ($self, $path, $method //= '')
+sub _maybe_cache ($self, $type, $path, $method)
 {
-	return $self->SUPER::match($path, $method)
+	return $self->$type($path, $method)
 		unless $self->has_cache;
 
-	my $key = "$path;$method";
+	my $key = "$type;$method;$path";
 	my $result = $self->cache->get($key);
 	return $result if $result;
 
-	$result = $self->SUPER::match($path, $method);
+	$result = $self->$type($path, $method);
 	$self->cache->set($key, $result);
 	return $result;
+}
+
+sub match ($self, $path, $method //= '')
+{
+	return $self->_maybe_cache('SUPER::match', $path, $method);
+}
+
+sub flat_match ($self, $path, $method //= '')
+{
+	return $self->_maybe_cache('SUPER::flat_match', $path, $method);
 }
 
 sub clear ($self)

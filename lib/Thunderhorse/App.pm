@@ -49,7 +49,7 @@ async sub pagi ($self, $scope, $receive, $send)
 
 	my $req = $context->req;
 	my $router = $self->router;
-	my @matches = $router->flatten($router->match($req->path, $req->method));
+	my @matches = $router->flat_match($req->path, $req->method);
 
 	my $res = $context->res;
 	foreach my $match (@matches) {
