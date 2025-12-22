@@ -4,11 +4,10 @@ use v5.40;
 use Mooish::Base -standard;
 
 extends 'Gears::Controller';
+with 'Thunderhorse::Routable';
 
 sub router ($self)
 {
-	my $router = $self->app->router;
-	$router->set_controller($self);
-	return $router;
+	return $self->app->router;
 }
 

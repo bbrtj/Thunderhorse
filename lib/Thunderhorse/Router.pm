@@ -9,7 +9,7 @@ use Thunderhorse::Router::Match;
 extends 'Gears::Router';
 
 has field 'controller' => (
-	isa => InstanceOf ['Thunderhorse::Controller'],
+	isa => ConsumerOf ['Thunderhorse::Routable'],
 	writer => 1,
 );
 

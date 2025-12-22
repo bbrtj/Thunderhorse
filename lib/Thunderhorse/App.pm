@@ -17,8 +17,11 @@ has field 'loop' => (
 );
 
 has extended 'router' => (
+	isa => InstanceOf ['Thunderhorse::Router'],
 	default => sub { Thunderhorse::Router->new },
 );
+
+with 'Thunderhorse::Routable';
 
 # async sub drain_request ($self, $receive) {
 #     while (1) {

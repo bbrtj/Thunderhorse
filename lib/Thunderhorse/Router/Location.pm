@@ -33,7 +33,7 @@ has param 'pagi' => (
 );
 
 has param 'controller' => (
-	isa => InstanceOf ['Thunderhorse::Controller'],
+	isa => ConsumerOf ['Thunderhorse::Routable'],
 );
 
 sub BUILD ($self, $)
