@@ -59,16 +59,16 @@ sub _match_level ($self, $locations, @args)
 	return ($bridge, @result);
 }
 
-sub match ($self, $method, $path)
+sub match ($self, $path, $method //= '')
 {
-	return $self->SUPER::match($method, $path)
+	return $self->SUPER::match($path, $method)
 		unless $self->has_cache;
 
-	my $key = "$method;$path";
+	my $key = "$path;$method";
 	my $result = $self->cache->get($key);
 	return $result if $result;
 
-	$result = $self->SUPER::match($path);
+	$result = $self->SUPER::match($path, $method);
 	$self->cache->set($key, $result);
 	return $result;
 }

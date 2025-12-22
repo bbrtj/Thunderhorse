@@ -8,9 +8,8 @@ use Gears::X;
 
 extends 'Gears::Router::Location::SigilMatch';
 
-has param 'method' => (
+has option 'method' => (
 	isa => Str,
-	default => 'GET',
 );
 
 has param 'name' => (
@@ -47,7 +46,7 @@ sub BUILD ($self, $)
 
 sub _build_name ($self)
 {
-	my $method = $self->method;
+	my $method = $self->method // 'ANY';
 	my $pattern = $self->pattern;
 	my $id = $self->router->get_next_route_id;
 
@@ -101,9 +100,9 @@ sub pagify ($self, $matched)
 	}
 }
 
-sub compare ($self, $method, $path)
+sub compare ($self, $path, $method)
 {
-	return undef unless $self->method eq $method;
+	return undef if $self->has_method && $self->method ne $method;
 	return $self->SUPER::compare($path);
 }
 
