@@ -4,6 +4,9 @@ use Benchmark::Dumb qw(cmpthese);
 use Kelp::Routes;
 use Thunderhorse::App;
 use Thunderhorse::Router;
+use Mojolicious::Routes;
+use Mojolicious::Routes::Match;
+use Mojolicious::Controller;
 
 package NullCache {
 	sub new { bless {}, $_[0] }
@@ -33,6 +36,7 @@ package THFullCache {
 
 my $cache = shift();
 my $k_cache = $cache ? FullCache->new : NullCache->new;
+my $m_cache = $cache ? FullCache->new : NullCache->new;
 my $th_cache = $cache ? THFullCache->new : THNullCache->new;
 
 my $th_a = Thunderhorse::App->new(
@@ -55,11 +59,22 @@ for (1 .. 20) {
 	$k_admin->add("/route$_" => {to => sub { }});
 }
 
+my $m_r = Mojolicious::Routes->new(cache => $m_cache);
+$m_r->under('/test')->get('/:sth');
+my $m_admin = $m_r->under('/admin');
+for (1 .. 20) {
+	$m_admin->get("/route$_");
+}
+my $m_c = Mojolicious::Controller->new;
+
 # use Data::Dumper;
 # print Dumper($k_r->match('/test/test2'));
+# print Dumper($m_m->find($m_c, {method => 'GET', path => '/test/test2'}));
 # print Dumper($th_r->match('/test/test2'));
 
 cmpthese 200.01, {
+	mojo =>
+		sub { Mojolicious::Routes::Match->new(root => $m_r)->find($m_c, {method => 'GET', path => '/test/test2'}) },
 	thunderhorse => sub { $th_r->flat_match('/test/test2') },
 	kelp => sub { $k_r->match('/test/test2') },
 };
