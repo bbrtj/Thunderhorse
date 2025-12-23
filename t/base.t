@@ -31,7 +31,7 @@ my $t = Thunderhorse::Test->new(app => BasicApp->new);
 subtest 'should route to a valid location' => sub {
 	$t->request('/basic/placeholder')
 		->status_is(200)
-		->header_is('Content-Type', 'text/html')
+		->header_is('Content-Type', 'text/html; charset=utf-8')
 		->body_is('BasicApp;Thunderhorse::Context;placeholder')
 		;
 };
@@ -39,7 +39,7 @@ subtest 'should route to a valid location' => sub {
 subtest 'should route to 404' => sub {
 	$t->request('/basic/')
 		->status_is(404)
-		->header_is('Content-Type', 'text/plain')
+		->header_is('Content-Type', 'text/plain; charset=utf-8')
 		->body_is('Not Found')
 		;
 };

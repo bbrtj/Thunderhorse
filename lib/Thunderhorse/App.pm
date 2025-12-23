@@ -39,9 +39,11 @@ async sub pagi ($self, $scope, $receive, $send)
 	die 'Unsupported scope type'
 		unless $scope_type =~ m/^(http|sse|websocket)$/;
 
-	my $context = Thunderhorse::Context->new(app => $self);
 	$scope = {$scope->%*};
-	$context->set_pagi([$scope, $receive, $send]);
+	my $context = Thunderhorse::Context->new(
+		app => $self,
+		pagi => [$scope, $receive, $send],
+	);
 
 	$scope->{thunderhorse} = {
 		context => $context,
@@ -56,11 +58,11 @@ async sub pagi ($self, $scope, $receive, $send)
 		my $location = $match->location;
 
 		await $location->pagify($match->matched)->($scope, $receive, $send);
-		last if $res->rendered;
+		last if $res->sent;
 	}
 
-	if (!$res->rendered) {
-		await $res->code(404)->render(text => 'Not Found');
+	if (!$res->sent) {
+		await $res->status(404)->text('Not Found');
 	}
 }
 

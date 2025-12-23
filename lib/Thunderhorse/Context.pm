@@ -10,9 +10,9 @@ use Thunderhorse::Response;
 
 extends 'Gears::Context';
 
-has field 'pagi' => (
+has param 'pagi' => (
 	(STRICT ? (isa => Tuple [HashRef, CodeRef, CodeRef]) : ()),
-	writer => 1,
+	writer => -hidden,
 );
 
 has field 'req' => (
@@ -24,6 +24,13 @@ has field 'res' => (
 	(STRICT ? (isa => InstanceOf ['Thunderhorse::Response']) : ()),
 	default => sub ($self) { Thunderhorse::Response->new(context => $self) },
 );
+
+sub set_pagi ($self, $new)
+{
+	$self->_set_pagi($new);
+	$self->req->update;
+	$self->res->update;
+}
 
 sub scope ($self)
 {

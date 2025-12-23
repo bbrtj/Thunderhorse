@@ -88,14 +88,16 @@ sub pagify ($self, $matched)
 				$result = await $result
 					if $result isa 'Future';
 
-				if (defined $result && !$res->rendered) {
-					# TODO: result should be an array? (code, content_type, content)
-					await $res->code(200)->render(html => $result);
+				if (defined $result && !$res->sent) {
+					# TODO: result should be an array? (status, content_type, content)
+					await $res->status(200)->html($result);
 				}
 			}
 			catch ($ex) {
 				die $ex unless $ex isa 'Gears::X::HTTP';
-				await $res->code($ex->code)->render(text => $ex->message);
+				# TODO: proper message
+				await $res->status($ex->status)->text('Error')
+				# TODO: log $ex->message
 			}
 		};
 	}

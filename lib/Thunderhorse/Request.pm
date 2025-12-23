@@ -3,19 +3,31 @@ package Thunderhorse::Request;
 use v5.40;
 use Mooish::Base -standard;
 
-use Devel::StrictMode;
+use Future::AsyncAwait;
+use JSON::MaybeXS qw(decode_json);
+use Gears::X;
 
-extends 'Thunderhorse::Message';
+extends 'PAGI::Request';
+with 'Thunderhorse::Message';
 
-sub mutable { false }
-
-sub path ($self)
+sub FOREIGNBUILDARGS ($class, %args)
 {
-	return $self->context->scope->{path};
+	Gears::X->raise('no context for response')
+		unless $args{context};
+
+	return $args{context}->pagi->@[0, 1];
 }
 
-sub method ($self)
+sub update ($self)
 {
-	return $self->context->scope->{method};
+	my $pagi = $self->context->pagi;
+	$self->{scope} = $pagi->[0];
+	$self->{receive} = $pagi->[1];
+}
+
+async sub json ($self)
+{
+	my $body = await $self->body;
+	return decode_json($body);
 }
 

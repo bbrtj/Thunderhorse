@@ -7,5 +7,5 @@ requires 'Mooish::Base' => '1.001';
 requires 'Gears' => '0';
 requires 'Future::AsyncAwait' => 0;
 requires 'IO::Async' => 0;
-requires 'HTTP::Headers::Fast' => 0;
+requires 'JSON::MaybeXS' => 0;
 
