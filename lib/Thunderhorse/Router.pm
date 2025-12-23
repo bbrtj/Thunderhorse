@@ -4,6 +4,7 @@ use v5.40;
 use Mooish::Base -standard;
 
 use Thunderhorse::Router::Location;
+use Gears::X;
 
 extends 'Gears::Router';
 
@@ -16,10 +17,10 @@ has field 'controller' => (
 # to location objects
 has option 'cache' => (
 	isa => HasMethods ['get', 'set', 'clear'],
+	trigger => 1,
 );
 
-# cache for finding locations
-has field '_find_cache' => (
+has field '_registered' => (
 	isa => HashRef,
 	default => sub { {} },
 );
@@ -31,6 +32,13 @@ has field '_last_route_id' => (
 	default => 0,
 	writer => 1,
 );
+
+sub _trigger_cache ($self, $new)
+{
+	if ($new->DOES('Thunderhorse::Router::SpecializedCache')) {
+		$new->set_router($self);
+	}
+}
 
 sub _build_location ($self, %args)
 {
@@ -61,11 +69,11 @@ sub _maybe_cache ($self, $type, $path, $method)
 
 	my $key = "$type;$method;$path";
 	my $result = $self->cache->get($key);
-	return $result if $result;
+	return $result->@* if $result;
 
-	$result = $self->$type($path, $method);
+	$result = [$self->$type($path, $method)];
 	$self->cache->set($key, $result);
-	return $result;
+	return $result->@*;
 }
 
 sub match ($self, $path, $method //= '')
@@ -83,12 +91,12 @@ sub clear ($self)
 	$self->cache->clear
 		if $self->has_cache;
 
-	$self->_find_cache->%* = ();
+	$self->_registered->%* = ();
 
 	return $self->SUPER::clear;
 }
 
-sub get_next_route_id ($self)
+sub _get_next_route_id ($self)
 {
 	my $last = $self->_last_route_id;
 	$self->_set_last_route_id(++$last);
@@ -96,23 +104,16 @@ sub get_next_route_id ($self)
 	return $last;
 }
 
-sub _find ($self, $name, $locations)
+sub _register_location ($self, $name, $location)
 {
-	foreach my $location ($locations->@*) {
-		return $location
-			if $location->name eq $name;
+	Gears::X->raise("duplicate location $name - location names must be unique")
+		if $self->_registered->{$name};
 
-		if ($location->locations->@*) {
-			my $found = $self->_find($name, $location->locations);
-			return $found if defined $found;
-		}
-	}
-
-	return undef;
+	$self->_registered->{$name} = $location;
 }
 
 sub find ($self, $name)
 {
-	return $self->_find_cache->{$name} //= $self->_find($name, $self->locations);
+	return $self->_registered->{$name};
 }
 

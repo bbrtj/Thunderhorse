@@ -15,6 +15,11 @@ has param 'pagi' => (
 	writer => -hidden,
 );
 
+has field 'match' => (
+	(STRICT ? (isa => InstanceOf ['Gears::Router::Match']) : ()),
+	writer => 1,
+);
+
 has field 'req' => (
 	(STRICT ? (isa => InstanceOf ['Thunderhorse::Request']) : ()),
 	default => sub ($self) { Thunderhorse::Request->new(context => $self) },

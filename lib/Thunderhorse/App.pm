@@ -3,7 +3,6 @@ package Thunderhorse::App;
 use v5.40;
 use Mooish::Base -standard;
 
-use Thunderhorse qw(pagify);
 use Thunderhorse::Context;
 use Thunderhorse::Router;
 
@@ -41,30 +40,30 @@ async sub pagi ($self, $scope, $receive, $send)
 		unless $scope_type =~ m/^(http|sse|websocket)$/;
 
 	$scope = {$scope->%*};
-	my $context = Thunderhorse::Context->new(
+	my $ctx = Thunderhorse::Context->new(
 		app => $self,
 		pagi => [$scope, $receive, $send],
 	);
 
-	$scope->{thunderhorse} = {
-		context => $context,
-	};
+	$scope->{thunderhorse} = $ctx;
 
-	my $req = $context->req;
+	my $req = $ctx->req;
 	my $router = $self->router;
 	my @matches = $router->flat_match($req->path, $req->method);
 
-	my $res = $context->res;
+	my $res = $ctx->res;
 	foreach my $match (@matches) {
-		my $location = $match->location;
-
-		await pagify($location, $match->matched)->($scope, $receive, $send);
+		$ctx->set_match($match);
+		await $match->location->pagi_app->($scope, $receive, $send);
 		last if $res->sent;
 	}
 
 	if (!$res->sent) {
 		await $res->status(404)->text('Not Found');
 	}
+
+	# TODO: what should app return?
+	return;
 }
 
 sub run ($self)
@@ -73,3 +72,4 @@ sub run ($self)
 		return $self->pagi(@args);
 	}
 }
+

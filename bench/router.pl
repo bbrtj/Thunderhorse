@@ -19,27 +19,47 @@ package FullCache {
 	sub clear { $_[0]{store}->%* = () }
 }
 
-my $cache_class = shift() ? 'FullCache' : 'NullCache';
+package THNullCache {
+	use Mooish::Base -standard;
+	extends 'NullCache';
+	with 'Thunderhorse::Router::SpecializedCache';
+}
 
-my $th_a = Thunderhorse::App->new(router => Thunderhorse::Router->new(cache => $cache_class->new));
+package THFullCache {
+	use Mooish::Base -standard;
+	extends 'FullCache';
+	with 'Thunderhorse::Router::SpecializedCache';
+}
+
+my $cache = shift();
+my $k_cache = $cache ? FullCache->new : NullCache->new;
+my $th_cache = $cache ? THFullCache->new : THNullCache->new;
+
+my $th_a = Thunderhorse::App->new(
+	router => Thunderhorse::Router->new(
+		# ($cache ? (cache => $th_cache) : ())
+		cache => $th_cache,
+	),
+);
 my $th_r = $th_a->router;
 $th_r->add('/test' => {to => sub { }})->add('/:sth' => {to => sub { }});
-$th_r->add('/x1' => {to => sub { }})->add('/x2' => {to => sub { }});
-$th_r->add('/y1' => {to => sub { }})->add('/y2' => {to => sub { }});
-$th_r->add('/z1' => {to => sub { }})->add('/z2' => {to => sub { }});
+my $th_admin = $th_r->add('/admin' => {to => sub { }});
+for (1 .. 20) {
+	$th_admin->add("/route$_" => {to => sub { }});
+}
 
-my $k_r = Kelp::Routes->new(cache => $cache_class->new);
+my $k_r = Kelp::Routes->new(cache => $k_cache);
 $k_r->add('/test' => {to => sub { }, bridge => 1})->add('/:sth' => {to => sub { }});
-$k_r->add('/x1' => {to => sub { }, bridge => 1})->add('/x2' => {to => sub { }});
-$k_r->add('/y1' => {to => sub { }, bridge => 1})->add('/y2' => {to => sub { }});
-$k_r->add('/z1' => {to => sub { }, bridge => 1})->add('/z2' => {to => sub { }});
+my $k_admin = $k_r->add('/admin' => {to => sub { }, bridge => 1});
+for (1 .. 20) {
+	$k_admin->add("/route$_" => {to => sub { }});
+}
 
 # use Data::Dumper;
-
-# print Dumper($th_r->match('/test/test2'));
 # print Dumper($k_r->match('/test/test2'));
+# print Dumper($th_r->match('/test/test2'));
 
-cmpthese 300.01, {
+cmpthese 200.01, {
 	thunderhorse => sub { $th_r->flat_match('/test/test2') },
 	kelp => sub { $k_r->match('/test/test2') },
 };
