@@ -1,0 +1,93 @@
+use Test2::V1 -ipP;
+use Thunderhorse::Test;
+
+################################################################################
+# This tests whether Thunderhorse controllers work
+################################################################################
+
+package ControllersApp {
+	use v5.40;
+	use Mooish::Base -standard;
+
+	extends 'Thunderhorse::App';
+
+	sub build ($self)
+	{
+		$self->set_controllers('Test', '+TestC2');
+
+		$self->router->add(
+			'/base' => {
+				to => 'test',
+			}
+		);
+	}
+
+	sub test ($self, $ctx)
+	{
+		return 'base: ' . ref $self;
+	}
+};
+
+package ControllersApp::Controller::Test {
+	use v5.40;
+	use Mooish::Base -standard;
+
+	extends 'Thunderhorse::Controller';
+
+	sub build ($self)
+	{
+		$self->router->add(
+			'/internal' => {
+				to => 'test',
+			}
+		);
+	}
+
+	sub test ($self, $ctx)
+	{
+		return 'internal: ' . ref $self;
+	}
+}
+
+package TestC2 {
+	use v5.40;
+	use Mooish::Base -standard;
+
+	extends 'Thunderhorse::Controller';
+
+	sub build ($self)
+	{
+		$self->router->add(
+			'/external' => {
+				to => 'test',
+			}
+		);
+	}
+
+	sub test ($self, $ctx)
+	{
+		return 'external: ' . ref $self;
+	}
+}
+
+my $t = Thunderhorse::Test->new(app => ControllersApp->new);
+
+subtest 'should route to a valid location' => sub {
+	$t->request('/base')
+		->status_is(200)
+		->body_is('base: ControllersApp')
+		;
+
+	$t->request('/internal')
+		->status_is(200)
+		->body_is('internal: ControllersApp::Controller::Test')
+		;
+
+	$t->request('/external')
+		->status_is(200)
+		->body_is('external: TestC2')
+		;
+};
+
+done_testing;
+
