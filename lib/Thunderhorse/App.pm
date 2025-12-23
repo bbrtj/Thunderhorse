@@ -53,8 +53,11 @@ async sub pagi ($self, $scope, $receive, $send)
 
 	my $res = $ctx->res;
 	foreach my $match (@matches) {
+		my $loc = $match->location;
+		next unless $loc->implemented;
+
 		$ctx->set_match($match);
-		await $match->location->pagi_app->($scope, $receive, $send);
+		await $loc->pagi_app->($scope, $receive, $send);
 		last if $res->sent;
 	}
 

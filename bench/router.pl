@@ -46,10 +46,10 @@ my $th_a = Thunderhorse::App->new(
 	),
 );
 my $th_r = $th_a->router;
-$th_r->add('/test' => {to => sub { }})->add('/:sth' => {to => sub { }});
-my $th_admin = $th_r->add('/admin' => {to => sub { }});
+$th_r->add('/test')->add('/:sth');
+my $th_admin = $th_r->add('/admin');
 for (1 .. 20) {
-	$th_admin->add("/route$_" => {to => sub { }});
+	$th_admin->add("/route$_");
 }
 
 my $k_r = Kelp::Routes->new(cache => $k_cache);

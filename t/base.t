@@ -55,6 +55,16 @@ package BasicApp {
 				},
 			}
 		);
+
+		my $bridge_unimplemented = $router->add('/bridge2');
+
+		$bridge_unimplemented->add(
+			'/success' => {
+				to => sub ($self, $ctx) {
+					return 'bridge passed';
+				},
+			},
+		);
 	}
 };
 
@@ -98,6 +108,14 @@ subtest 'should fail bridge and return 403' => sub {
 		->header_is('Content-Type', 'text/plain; charset=utf-8')
 		# TODO: ->body_is('Forbidden')
 		->body_is('Error')
+		;
+};
+
+subtest 'should pass unimplemented bridge' => sub {
+	$t->request('/bridge2/success')
+		->status_is(200)
+		->header_is('Content-Type', 'text/html; charset=utf-8')
+		->body_is('bridge passed')
 		;
 };
 

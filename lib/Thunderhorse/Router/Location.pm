@@ -17,8 +17,9 @@ has param 'name' => (
 	lazy => 1,
 );
 
-has param 'to' => (
+has option 'to' => (
 	isa => Str | CodeRef,
+	predicate => 'implemented',
 );
 
 has param 'order' => (
@@ -43,7 +44,7 @@ has param 'pagi_app' => (
 sub BUILD ($self, $)
 {
 	Gears::X->raise('controller has no action ' . $self->to)
-		unless $self->get_destination;
+		if $self->implemented && !$self->get_destination;
 
 	# register the route in the router
 	$self->router->_register_location($self->name, $self);
