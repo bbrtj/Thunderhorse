@@ -95,7 +95,7 @@ sub _build_pagi_app ($self)
 			catch ($ex) {
 				die $ex unless $ex isa 'Gears::X::HTTP';
 				# TODO: proper message
-				await $ctx->res->status($ex->status)->text('Error')
+				await $ctx->res->status($ex->code)->text('Error')
 				# TODO: log $ex->message
 			}
 		};
