@@ -22,8 +22,11 @@ sub update ($self)
 	$self->{send} = $pagi->[2];
 }
 
-sub sent ($self)
+sub sent ($self, $value = undef)
 {
-	return !!$self->{_sent};
+	return $self->{_sent}
+		unless defined $value;
+
+	return $self->{_sent} = !!$value;
 }
 

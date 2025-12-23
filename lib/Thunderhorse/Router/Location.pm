@@ -62,50 +62,8 @@ sub get_destination ($self)
 	return $self->controller->can($self->to);
 }
 
-# TODO: cache this
-# TODO: move this somewhere else (but not to match)
-sub pagify ($self, $matched)
-{
-	my $dest = $self->get_destination;
-	if ($self->pagi) {
-		# TODO: this should always mark as rendered
-		# TODO: adjust PAGI (like Kelp did to PSGI)
-		return $dest;
-	}
-	else {
-		weaken $self;
-
-		return async sub ($scope, $receive, $send) {
-			Gears::X->raise('bad PAGI execution chain, not a thunderhorse app')
-				unless exists $scope->{thunderhorse};
-
-			my $context = $scope->{thunderhorse}{context};
-			$context->set_pagi([$scope, $receive, $send]);
-
-			my $res = $context->res;
-			try {
-				my $result = $dest->($self->controller, $context, $matched->@*);
-				$result = await $result
-					if $result isa 'Future';
-
-				if (defined $result && !$res->sent) {
-					# TODO: result should be an array? (status, content_type, content)
-					await $res->status(200)->html($result);
-				}
-			}
-			catch ($ex) {
-				die $ex unless $ex isa 'Gears::X::HTTP';
-				# TODO: proper message
-				await $res->status($ex->status)->text('Error')
-				# TODO: log $ex->message
-			}
-		};
-	}
-}
-
 sub compare ($self, $path, $method)
 {
 	return undef if $self->has_method && $self->method ne $method;
 	return $self->SUPER::compare($path);
 }
-

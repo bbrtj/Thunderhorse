@@ -3,6 +3,7 @@ package Thunderhorse::App;
 use v5.40;
 use Mooish::Base -standard;
 
+use Thunderhorse qw(pagify);
 use Thunderhorse::Context;
 use Thunderhorse::Router;
 
@@ -57,7 +58,7 @@ async sub pagi ($self, $scope, $receive, $send)
 	foreach my $match (@matches) {
 		my $location = $match->location;
 
-		await $location->pagify($match->matched)->($scope, $receive, $send);
+		await pagify($location, $match->matched)->($scope, $receive, $send);
 		last if $res->sent;
 	}
 
@@ -72,4 +73,3 @@ sub run ($self)
 		return $self->pagi(@args);
 	}
 }
-
