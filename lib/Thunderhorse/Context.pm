@@ -33,7 +33,7 @@ has field 'res' => (
 
 has field '_consumed' => (
 	(STRICT ? (isa => Bool) : ()),
-	writer => -public,
+	writer => 1,
 	default => false,
 );
 
@@ -57,6 +57,12 @@ sub receiver ($self)
 sub sender ($self)
 {
 	return $self->pagi->[2];
+}
+
+sub consume ($self)
+{
+	$self->_set_consumed(true);
+	return $self;
 }
 
 sub is_consumed ($self)
