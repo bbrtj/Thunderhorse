@@ -13,7 +13,7 @@ sub FOREIGNBUILDARGS ($class, %args)
 	Gears::X::Thunderhorse->raise('no context for response')
 		unless $args{context};
 
-	return $args{context}->pagi->@[2, 0];
+	return $args{context}->pagi->@[0, 2];
 }
 
 sub update ($self)
