@@ -3,14 +3,14 @@ package Thunderhorse::Response;
 use v5.40;
 use Mooish::Base -standard;
 
-use Gears::X;
+use Gears::X::Thunderhorse;
 
 extends 'PAGI::Response';
 with 'Thunderhorse::Message';
 
 sub FOREIGNBUILDARGS ($class, %args)
 {
-	Gears::X->raise('no context for response')
+	Gears::X::Thunderhorse->raise('no context for response')
 		unless $args{context};
 
 	return $args{context}->pagi->@[2, 0];

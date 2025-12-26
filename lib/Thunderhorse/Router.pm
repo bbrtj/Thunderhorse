@@ -4,7 +4,7 @@ use v5.40;
 use Mooish::Base -standard;
 
 use Thunderhorse::Router::Location;
-use Gears::X;
+use Gears::X::Thunderhorse;
 
 extends 'Gears::Router';
 
@@ -106,7 +106,7 @@ sub _get_next_route_id ($self)
 
 sub _register_location ($self, $name, $location)
 {
-	Gears::X->raise("duplicate location $name - location names must be unique")
+	Gears::X::Thunderhorse->raise("duplicate location $name - location names must be unique")
 		if $self->_registered->{$name};
 
 	$self->_registered->{$name} = $location;

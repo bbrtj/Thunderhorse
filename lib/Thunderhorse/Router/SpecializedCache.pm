@@ -3,6 +3,8 @@ package Thunderhorse::Router::SpecializedCache;
 use v5.40;
 use Mooish::Base -standard, -role;
 
+use Gears::X::Thunderhorse;
+
 requires qw(
 	get
 	set
@@ -50,7 +52,7 @@ my sub retrieve ($router, $matches)
 
 			# locations must be created in a deterministic order - otherwise,
 			# this error may occur
-			Gears::X->raise("invalid cached location $location")
+			Gears::X::Thunderhorse->raise("invalid cached location $location")
 				unless $args{location};
 			$match = bless \%args, $class;
 		}

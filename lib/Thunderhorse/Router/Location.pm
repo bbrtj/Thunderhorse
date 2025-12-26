@@ -4,7 +4,7 @@ use v5.40;
 use Mooish::Base -standard;
 
 use Future::AsyncAwait;
-use Gears::X;
+use Gears::X::Thunderhorse;
 
 extends 'Gears::Router::Location::SigilMatch';
 
@@ -43,7 +43,7 @@ has param 'pagi_app' => (
 
 sub BUILD ($self, $)
 {
-	Gears::X->raise('controller has no action ' . $self->to)
+	Gears::X::Thunderhorse->raise('controller has no action ' . $self->to)
 		if $self->implemented && !$self->get_destination;
 
 	# register the route in the router
@@ -77,7 +77,7 @@ sub _build_pagi_app ($self)
 	}
 	else {
 		return async sub ($scope, $receive, $send) {
-			Gears::X->raise('bad PAGI execution chain, not a thunderhorse app')
+			Gears::X::Thunderhorse->raise('bad PAGI execution chain, not a thunderhorse app')
 				unless exists $scope->{thunderhorse};
 
 			my $ctx = $scope->{thunderhorse};

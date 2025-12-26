@@ -5,14 +5,14 @@ use Mooish::Base -standard;
 
 use Future::AsyncAwait;
 use JSON::MaybeXS qw(decode_json);
-use Gears::X;
+use Gears::X::Thunderhorse;
 
 extends 'PAGI::Request';
 with 'Thunderhorse::Message';
 
 sub FOREIGNBUILDARGS ($class, %args)
 {
-	Gears::X->raise('no context for response')
+	Gears::X::Thunderhorse->raise('no context for response')
 		unless $args{context};
 
 	return $args{context}->pagi->@[0, 1];
