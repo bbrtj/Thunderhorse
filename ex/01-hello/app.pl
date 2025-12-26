@@ -1,9 +1,25 @@
 use v5.40;
 
-use File::Basename qw(dirname);
-use lib dirname(__FILE__) . '/lib';
+package HelloApp {
+	use Mooish::Base -standard;
+	extends 'Thunderhorse::App';
 
-use HelloApp;
+	sub build ($self)
+	{
+		my $r = $self->router;
+
+		$r->add(
+			'/hello/?msg' => {
+				to => sub ($self, $ctx, $msg) {
+					return "Hello, $msg";
+				},
+				defaults => {
+					msg => 'world',
+				},
+			}
+		);
+	}
+}
 
 HelloApp->new->run;
 

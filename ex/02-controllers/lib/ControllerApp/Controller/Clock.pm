@@ -16,7 +16,7 @@ sub build ($self)
 	);
 }
 
-sub show_clock ($self, $context)
+sub show_clock ($self, $ctx)
 {
 	my $pos = tell DATA;
 	my $html = do { local $/; <DATA> };
@@ -62,3 +62,4 @@ __DATA__
 	</script>
 </body>
 </html>
+
