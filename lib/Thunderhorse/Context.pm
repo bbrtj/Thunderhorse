@@ -30,6 +30,12 @@ has field 'res' => (
 	default => sub ($self) { Thunderhorse::Response->new(context => $self) },
 );
 
+has field '_consumed' => (
+	(STRICT ? (isa => Bool) : ()),
+	writer => -public,
+	default => false,
+);
+
 sub set_pagi ($self, $new)
 {
 	$self->_set_pagi($new);
@@ -50,5 +56,10 @@ sub receiver ($self)
 sub sender ($self)
 {
 	return $self->pagi->[2];
+}
+
+sub is_consumed ($self)
+{
+	return $self->_consumed || $self->res->is_sent;
 }
 

@@ -70,7 +70,7 @@ sub _build_pagi_app ($self)
 		# TODO: adjust PAGI (like Kelp did to PSGI)
 		return async sub ($scope, @args) {
 			my $result = await $dest->($scope, @args);
-			$scope->{thunderhorse}->res->sent(true);
+			$scope->{thunderhorse}->is_consumed(true);
 
 			return $result;
 		}
@@ -88,7 +88,7 @@ sub _build_pagi_app ($self)
 				$result = await $result
 					if $result isa 'Future';
 
-				if (defined $result && !$ctx->res->sent) {
+				if (defined $result && !$ctx->is_consumed) {
 					# TODO: result should be an array? (status, content_type, content)
 					await $ctx->res->status(200)->html($result);
 				}

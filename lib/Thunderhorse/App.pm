@@ -51,18 +51,17 @@ async sub pagi ($self, $scope, $receive, $send)
 	my $router = $self->router;
 	my @matches = $router->flat_match($req->path, $req->method);
 
-	my $res = $ctx->res;
 	foreach my $match (@matches) {
 		my $loc = $match->location;
 		next unless $loc->implemented;
 
 		$ctx->set_match($match);
 		await $loc->pagi_app->($scope, $receive, $send);
-		last if $res->sent;
+		last if $ctx->is_consumed;
 	}
 
-	if (!$res->sent) {
-		await $res->status(404)->text('Not Found');
+	if (!$ctx->is_consumed) {
+		await $ctx->res->status(404)->text('Not Found');
 	}
 
 	# TODO: what should app return?

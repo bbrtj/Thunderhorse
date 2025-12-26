@@ -13,20 +13,13 @@ sub FOREIGNBUILDARGS ($class, %args)
 	Gears::X->raise('no context for response')
 		unless $args{context};
 
-	return $args{context}->pagi->@[2];
+	return $args{context}->pagi->@[2, 0];
 }
 
 sub update ($self)
 {
 	my $pagi = $self->context->pagi;
+	$self->{scope} = $pagi->[0];
 	$self->{send} = $pagi->[2];
-}
-
-sub sent ($self, $value = undef)
-{
-	return $self->{_sent}
-		unless defined $value;
-
-	return $self->{_sent} = !!$value;
 }
 

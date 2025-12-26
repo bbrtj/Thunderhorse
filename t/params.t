@@ -90,8 +90,7 @@ subtest 'should handle single form parameter' => sub {
 	$t->request(
 		'/post',
 		method => 'POST',
-		headers => [['content-type', 'application/x-www-form-urlencoded']],
-		body => 'foo=bar'
+		form => {foo => 'bar'},
 		)
 		->status_is(200)
 		->body_like(qr/^foo: bar$/m)
@@ -102,8 +101,7 @@ subtest 'should handle multiple form parameters' => sub {
 	$t->request(
 		'/post',
 		method => 'POST',
-		headers => [['content-type', 'application/x-www-form-urlencoded']],
-		body => 'foo=bar&baz=qux'
+		form => {foo => 'bar', baz => 'qux'},
 		)
 		->status_is(200)
 		->body_like(qr/^foo: bar$/m)
@@ -115,8 +113,7 @@ subtest 'should handle form parameter with multiple values' => sub {
 	$t->request(
 		'/post',
 		method => 'POST',
-		headers => [['content-type', 'application/x-www-form-urlencoded']],
-		body => 'foo=bar&foo=baz'
+		form => {foo => ['bar', 'baz']},
 		)
 		->status_is(200)
 		->body_like(qr/^foo: bar, baz$/m)
@@ -124,14 +121,14 @@ subtest 'should handle form parameter with multiple values' => sub {
 };
 
 subtest 'should handle custom headers' => sub {
-	$t->request('/headers', headers => [['x-custom-header', 'test-value']])
+	$t->request('/headers', headers => {'x-custom-header' => ['test-value']})
 		->status_is(200)
 		->body_like(qr/^x-custom-header: test-value$/m)
 		;
 };
 
 subtest 'should handle multiple header values' => sub {
-	$t->request('/headers', headers => [['x-multi', 'value1'], ['x-multi', 'value2']])
+	$t->request('/headers', headers => {'x-multi' => ['value1', 'value2']})
 		->status_is(200)
 		->body_like(qr/^x-multi: value1, value2$/m)
 		;
