@@ -45,13 +45,13 @@ package EdgeApp {
 
 	sub stash_and_return ($self, $ctx, $msg)
 	{
-		push $ctx->req->stash->{order}->@*, $msg;
+		push $ctx->stash->{order}->@*, $msg;
 		return undef;
 	}
 
 	sub print_stash ($self, $ctx)
 	{
-		return join ' -> ', $ctx->req->stash->{order}->@*;
+		return join ' -> ', $ctx->stash->{order}->@*;
 	}
 
 	sub print_method ($self, $ctx)

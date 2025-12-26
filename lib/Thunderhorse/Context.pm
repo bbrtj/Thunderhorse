@@ -23,6 +23,7 @@ has field 'match' => (
 has field 'req' => (
 	(STRICT ? (isa => InstanceOf ['Thunderhorse::Request']) : ()),
 	default => sub ($self) { Thunderhorse::Request->new(context => $self) },
+	handles => [qw(stash)],
 );
 
 has field 'res' => (
