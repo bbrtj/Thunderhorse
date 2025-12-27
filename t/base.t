@@ -1,3 +1,4 @@
+use v5.40;
 use Test2::V1 -ipP;
 use Thunderhorse::Test;
 
@@ -6,7 +7,6 @@ use Thunderhorse::Test;
 ################################################################################
 
 package BasicApp {
-	use v5.40;
 	use Mooish::Base -standard;
 
 	use Gears::X::HTTP;

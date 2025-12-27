@@ -17,9 +17,9 @@ has param 'name' => (
 	lazy => 1,
 );
 
-has option 'to' => (
+has param 'to' => (
 	isa => Str | CodeRef,
-	predicate => 'implemented',
+	required => 0,
 );
 
 has param 'order' => (
@@ -30,6 +30,11 @@ has param 'order' => (
 has param 'pagi' => (
 	isa => Bool,
 	default => false,
+);
+
+has param 'pagi_middleware' => (
+	isa => CodeRef,
+	required => 0,
 );
 
 has param 'controller' => (
@@ -44,7 +49,7 @@ has param 'pagi_app' => (
 sub BUILD ($self, $)
 {
 	Gears::X::Thunderhorse->raise('controller has no action ' . $self->to)
-		if $self->implemented && !$self->get_destination;
+		if defined $self->to && !$self->get_destination;
 
 	# register the route in the router
 	$self->router->_register_location($self->name, $self);
@@ -65,10 +70,11 @@ sub _build_pagi_app ($self)
 	weaken $self;
 	my $dest = $self->get_destination;
 	my $controller = $self->controller;
+	my $pagi;
 
 	if ($self->pagi) {
 		# TODO: adjust PAGI (like Kelp did to PSGI)
-		return async sub ($scope, @args) {
+		$pagi = async sub ($scope, @args) {
 			Gears::X::Thunderhorse->raise('bad PAGI execution chain, not a Thunderhorse app')
 				unless exists $scope->{thunderhorse};
 
@@ -79,7 +85,7 @@ sub _build_pagi_app ($self)
 		}
 	}
 	else {
-		return async sub ($scope, $receive, $send) {
+		$pagi = async sub ($scope, $receive, $send) {
 			Gears::X::Thunderhorse->raise('bad PAGI execution chain, not a Thunderhorse app')
 				unless exists $scope->{thunderhorse};
 
@@ -124,13 +130,19 @@ sub _build_pagi_app ($self)
 			}
 		};
 	}
+
+	if (my $mw = $self->pagi_middleware) {
+		$pagi = $mw->($pagi);
+	}
+
+	return $pagi;
 }
 
 sub get_destination ($self)
 {
-	return undef unless $self->implemented;
-
 	my $to = $self->to;
+	return undef unless defined $to;
+
 	return $to if ref $to eq 'CODE';
 	return $self->controller->can($self->to);
 }
