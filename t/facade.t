@@ -1,0 +1,113 @@
+use v5.40;
+use Test2::V1 -ipP;
+use Thunderhorse::Test;
+
+################################################################################
+# This tests whether facades work correctly
+################################################################################
+
+package FacadeApp::Controller::Test::Facade {
+	use Future::AsyncAwait;
+	use parent 'Thunderhorse::Context::Facade';
+
+	async sub send_something_later ($ctx_ref)
+	{
+		await $ctx_ref->app->loop->delay_future(after => 1);
+		await $ctx_ref->res->text('Something');
+	}
+}
+
+package FacadeApp::Controller::Test {
+	use Mooish::Base -standard;
+	use Future::AsyncAwait;
+
+	extends 'Thunderhorse::Controller';
+
+	sub facade_class
+	{
+		return 'FacadeApp::Controller::Test::Facade';
+	}
+
+	sub build ($self)
+	{
+		my $router = $self->router;
+
+		# this is good, because it does await - $ctx will no longer have
+		# references
+		$router->add(
+			'/good' => {
+				to => async sub ($self, $ctx) {
+					await $ctx->send_something_later;
+					return;
+				}
+			}
+		);
+
+		# TODO: this does not work yet
+		# this is good, because it consumes the context explicitly - no need to
+		# await because Thunderhorse knows the response will be rendered
+		# eventually
+		# $router->add(
+		# 	'/consumed' => {
+		# 		to => async sub ($self, $ctx) {
+		# 			$ctx->consume;
+		# 			$ctx->send_something_later;
+		# 		}
+		# 	}
+		# );
+
+		# this is bad, because it does not await - $ctx will have references
+		# and Thunderhorse will raise an exception
+		$router->add(
+			'/bad' => {
+				to => async sub ($self, $ctx) {
+					$ctx->send_something_later;
+					return;
+				}
+			}
+		);
+	}
+}
+
+package FacadeApp {
+	use Mooish::Base -standard;
+
+	extends 'Thunderhorse::App';
+
+	sub build ($self)
+	{
+		$self->set_controllers('Test');
+	}
+}
+
+my $t = Thunderhorse::Test->new(app => FacadeApp->new);
+
+subtest 'should render /good' => sub {
+	$t->request('/good')
+		->status_is(200)
+		->header_is('Content-Type', 'text/plain; charset=utf-8')
+		->body_is('Something')
+		;
+};
+
+# TODO: this does not work yet
+# subtest 'should render /consumed' => sub {
+# 	$t->request('/consumed')
+# 		->status_is(200)
+# 		->header_is('Content-Type', 'text/plain; charset=utf-8')
+# 		->body_is('Something')
+# 		;
+# };
+
+subtest 'should not render /bad' => sub {
+	# TODO: error now propagates outside of test client
+	# $t->request('/bad')
+	# 	->status_is(500)
+	# 	;
+	like dies {
+		$t->request('/bad')
+	}, qr/\Qforgot to await?\E/, 'exception ok';
+};
+
+done_testing;
+

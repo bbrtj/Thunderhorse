@@ -33,6 +33,11 @@ with 'Thunderhorse::Routable';
 #     }
 # }
 
+sub app ($self)
+{
+	return $self;
+}
+
 async sub pagi ($self, $scope, $receive, $send)
 {
 	my $scope_type = $scope->{type};

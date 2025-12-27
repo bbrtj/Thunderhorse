@@ -84,13 +84,21 @@ sub _build_pagi_app ($self)
 			$ctx->set_pagi([$scope, $receive, $send]);
 
 			try {
-				my $result = $dest->($controller, $ctx, $ctx->match->matched->@*);
+				my $facade = $controller->make_facade($ctx);
+				my $result = $dest->($controller, $facade, $ctx->match->matched->@*);
 				$result = await $result
 					if $result isa 'Future';
 
-				if (defined $result && !$ctx->is_consumed) {
-					# TODO: result should be an array? (status, content_type, content)
-					await $ctx->res->status(200)->html($result);
+				if (!$ctx->is_consumed) {
+					if (defined $result) {
+						# TODO: result should be an array? (status, content_type, content)
+						await $ctx->res->status(200)->html($result);
+					}
+					else {
+						weaken $facade;
+						Gears::X::Thunderhorse->raise("context hasn't been given up - forgot to await?")
+							if defined $facade;
+					}
 				}
 			}
 			catch ($ex) {
