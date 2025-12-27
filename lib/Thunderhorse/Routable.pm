@@ -9,14 +9,9 @@ requires qw(
 	app
 );
 
-sub facade_class
-{
-	return 'Thunderhorse::Context::Facade';
-}
-
 sub make_facade ($self, $ctx)
 {
-	return bless \$ctx, $self->facade_class;
+	return Thunderhorse::Context::Facade->new(context => $ctx);
 }
 
 around router => sub ($orig, $self) {

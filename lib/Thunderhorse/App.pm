@@ -69,7 +69,6 @@ async sub pagi ($self, $scope, $receive, $send)
 		await $ctx->res->status(404)->text('Not Found');
 	}
 
-	# TODO: what should app return?
 	return;
 }
 

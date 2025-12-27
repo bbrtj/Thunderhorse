@@ -69,6 +69,9 @@ sub _build_pagi_app ($self)
 	if ($self->pagi) {
 		# TODO: adjust PAGI (like Kelp did to PSGI)
 		return async sub ($scope, @args) {
+			Gears::X::Thunderhorse->raise('bad PAGI execution chain, not a Thunderhorse app')
+				unless exists $scope->{thunderhorse};
+
 			my $result = await $dest->($scope, @args);
 			$scope->{thunderhorse}->consume;
 
@@ -77,7 +80,7 @@ sub _build_pagi_app ($self)
 	}
 	else {
 		return async sub ($scope, $receive, $send) {
-			Gears::X::Thunderhorse->raise('bad PAGI execution chain, not a thunderhorse app')
+			Gears::X::Thunderhorse->raise('bad PAGI execution chain, not a Thunderhorse app')
 				unless exists $scope->{thunderhorse};
 
 			my $ctx = $scope->{thunderhorse};

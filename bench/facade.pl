@@ -11,11 +11,11 @@ cmpthese 200.01, {
 		$ctx->is_consumed;
 
 		# create facade anyway, so we don't bench the bless overhead
-		my $facade = bless \$ctx, 'Thunderhorse::Context::Facade';
+		my $facade = Thunderhorse::Context::Facade->new(context => $ctx);
 	},
 	facade => sub {
 		my $ctx = Thunderhorse::Context->new(app => false, pagi => [{}, sub { }, sub { }]);
-		my $facade = bless \$ctx, 'Thunderhorse::Context::Facade';
+		my $facade = Thunderhorse::Context::Facade->new(context => $ctx);
 		$facade->consume;
 		$facade->is_consumed;
 	},

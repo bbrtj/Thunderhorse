@@ -2,13 +2,24 @@ package Thunderhorse::Context::Facade;
 
 use v5.40;
 
-# fast access (autoloading is kind of slow)
-sub app { $_[0]->$*->app }
-sub req { $_[0]->$*->req }
-sub res { $_[0]->$*->res }
+use Mooish::Base -standard;
+
+use Devel::StrictMode;
+
+# use handles for fast access (autoloading is kind of slow)
+has param 'context' => (
+	(STRICT ? (isa => InstanceOf ['Thunderhorse::Context']) : ()),
+	handles => [
+		qw(
+			app
+			req
+			res
+		)
+	],
+);
 
 # autoload the rest
-sub AUTOLOAD ($ctx_ref, @args)
+sub AUTOLOAD ($self, @args)
 {
 	state %methods;
 	our $AUTOLOAD;
@@ -19,13 +30,18 @@ sub AUTOLOAD ($ctx_ref, @args)
 		$wanted;
 	};
 
-	return $ctx_ref->$*->$method(@args);
+	# do not call context in package context
+	die "no such method $method"
+		unless ref $self;
+
+	return $self->context->$method(@args);
 }
 
-sub can ($ctx_ref, $method)
+sub can ($self, $method)
 {
-	my $context_can = $ctx_ref->$*->can($method);
+	# extra careful here, not to call context method in package context
+	my $context_can = ref $self && $self->context->can($method);
 	return $context_can if $context_can;
-	return $ctx_ref->SUPER::can($method);
+	return $self->SUPER::can($method);
 }
 

@@ -7,13 +7,15 @@ use Thunderhorse::Test;
 ################################################################################
 
 package FacadeApp::Controller::Test::Facade {
+	use Mooish::Base -standard;
 	use Future::AsyncAwait;
-	use parent 'Thunderhorse::Context::Facade';
 
-	async sub send_something_later ($ctx_ref)
+	extends 'Thunderhorse::Context::Facade';
+
+	async sub send_something_later ($self)
 	{
-		await $ctx_ref->app->loop->delay_future(after => 1);
-		await $ctx_ref->res->text('Something');
+		await $self->app->loop->delay_future(after => 1);
+		await $self->res->text('Something');
 	}
 }
 
@@ -23,9 +25,9 @@ package FacadeApp::Controller::Test {
 
 	extends 'Thunderhorse::Controller';
 
-	sub facade_class
+	sub make_facade ($self, $ctx)
 	{
-		return 'FacadeApp::Controller::Test::Facade';
+		return FacadeApp::Controller::Test::Facade->new(context => $ctx);
 	}
 
 	sub build ($self)
