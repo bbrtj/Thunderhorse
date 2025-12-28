@@ -15,6 +15,12 @@ has field 'test' => (
 	lazy => 1,
 );
 
+has param 'raise_exceptions' => (
+	isa => Bool,
+	writer => 1,
+	default => true,
+);
+
 has field 'response' => (
 	isa => InstanceOf ['PAGI::Test::Response'],
 	writer => 1,
@@ -29,6 +35,11 @@ sub request ($self, $path, %args)
 {
 	my $method = lc(delete $args{method} // 'GET');
 	$self->set_response($self->test->$method($path, %args));
+
+	if ($self->response->exception && $self->raise_exceptions) {
+		die $self->response->exception;
+	}
+
 	return $self;
 }
 

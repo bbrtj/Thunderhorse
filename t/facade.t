@@ -91,17 +91,21 @@ subtest 'should render /good' => sub {
 		;
 };
 
-subtest 'should render /consumed' => sub {
+subtest 'should not render /consumed' => sub {
 	like dies {
 		$t->request('/consumed');
 	}, qr/\QDid you forget to 'await'\E/, 'exception ok';
 };
 
 subtest 'should not render /bad' => sub {
+	$t->set_raise_exceptions(false);
+
 	$t->request('/bad')
 		->status_is(500)
 		->exception_like(qr/\Qforgot await?\E/)
 		;
+
+	$t->set_raise_exceptions(true);
 };
 
 done_testing;
