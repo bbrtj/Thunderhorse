@@ -1,0 +1,50 @@
+use v5.40;
+use Test2::V1 -ipP;
+
+################################################################################
+# This tests whether autoloading works correctly
+################################################################################
+
+package TestApp {
+	use Mooish::Base -standard;
+	extends 'Thunderhorse::App';
+
+	sub testone ($self, $arg)
+	{
+		return "one $arg " . ref $self;
+	}
+}
+
+package TestAutoloader {
+	use Mooish::Base -standard;
+	extends 'Thunderhorse::AppController';
+
+	sub testtwo ($self, @args)
+	{
+		return $self->SUPER::testtwo(@args);
+	}
+}
+
+my $app = TestApp->new;
+my $c = TestAutoloader->new(app => $app);
+
+subtest '"can" from app controller should work' => sub {
+	can_ok $c, ['testone', 'run'], 'can on app methods ok';
+	can_ok $c, ['does', 'meta'], 'can on Moo methods ok';
+	can_ok $c, ['isa', 'DOES'], 'can on universal methods ok';
+};
+
+subtest 'autoloading from app controller should work' => sub {
+	is $c->testone('two'), 'one two TestApp', 'running app methods ok';
+	ok $c->does('Thunderhorse::Autoloadable'), 'running Moo methods ok';
+	ok $c->isa('Thunderhorse::Controller'), 'running universal methods ok';
+};
+
+subtest 'autoloading bad symbols should not work' => sub {
+	ok !$c->can('testthree'), 'can on bad methods ok';
+	like dies { $c->testtwo }, qr{no such method TestAutoloader::SUPER::testtwo}, 'method with bad SUPER ok';
+	like dies { $c->testthree }, qr{Can't locate object method "testthree" via package "TestApp"}, 'bad method ok';
+};
+
+done_testing;
+
