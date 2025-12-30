@@ -12,16 +12,20 @@ extends 'Thunderhorse::Module';
 
 has field 'logger' => (
 	isa => InstanceOf ['Gears::Logger'],
-	writer => -hidden,
+	lazy => 1,
 );
+
+sub _build_logger ($self)
+{
+	my $config = $self->config;
+
+	return Gears::Logger::Log4perl->new($config->%*);
+}
 
 sub build ($self)
 {
 	weaken $self;
-	my $config = $self->config;
-
-	my $logger = Gears::Logger::Log4perl->new($config->%*);
-	$self->_set_logger($logger);
+	my $logger = $self->logger;
 
 	$self->register(
 		controller => log => sub ($controller, $level, @messages) {

@@ -10,16 +10,20 @@ extends 'Thunderhorse::Module';
 
 has field 'template' => (
 	isa => InstanceOf ['Gears::Template'],
-	writer => -hidden,
+	lazy => 1,
 );
+
+sub _build_template ($self)
+{
+	my $config = $self->config;
+
+	return Gears::Template::TT->new($config->%*);
+}
 
 sub build ($self)
 {
 	weaken $self;
-	my $config = $self->config;
-
-	my $tpl = Gears::Template::TT->new($config->%*);
-	$self->_set_template($tpl);
+	my $tpl = $self->template;
 
 	$self->register(
 		controller => render => sub ($controller, $template, $vars = {}) {
