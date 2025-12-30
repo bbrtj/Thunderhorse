@@ -62,12 +62,8 @@ subtest 'should render template from file with wrapper' => sub {
 	$t->request('/test')
 		->status_is(200)
 		->header_is('Content-Type', 'text/html; charset=utf-8')
-		# TODO: this does not work yet with unicode
-		# ->body_like(qr{^zażółć gęślą jaźń Hello World!\v+$})
+		->body_like(qr{^zażółć gęślą jaźń Hello World!\v+$})
 		;
-
-	require Encode;
-	like Encode::decode('UTF-8', $t->response->text), qr{^zażółć gęślą jaźń Hello World!\v+$};
 };
 
 subtest 'should render inline template' => sub {
