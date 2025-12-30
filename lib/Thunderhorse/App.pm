@@ -3,6 +3,7 @@ package Thunderhorse::App;
 use v5.40;
 use Mooish::Base -standard;
 
+use Thunderhorse::Config;
 use Gears qw(load_component get_component_name);
 use Thunderhorse::Context;
 use Thunderhorse::Router;
@@ -13,6 +14,16 @@ use IO::Async::Loop;
 use Future::AsyncAwait;
 
 extends 'Gears::App';
+
+has param 'env' => (
+	isa => Enum ['production', 'development', 'test'],
+	default => sub { $ENV{PAGI_ENV} },
+);
+
+has param 'config_files' => (
+	isa => Bool,
+	default => false,
+);
 
 has field 'loop' => (
 	isa => InstanceOf ['IO::Async::Loop'],
@@ -29,6 +40,10 @@ has extended 'router' => (
 	reader => '_router',
 	isa => InstanceOf ['Thunderhorse::Router'],
 	default => sub { Thunderhorse::Router->new },
+);
+
+has extended 'config' => (
+	default => sub { Thunderhorse::Config->new },
 );
 
 has field 'modules' => (
@@ -60,6 +75,13 @@ sub router ($self)
 	my $router = $self->_router;
 	$router->set_controller($self->controller);
 	return $router;
+}
+
+sub configure ($self)
+{
+	return unless $self->config_files;
+
+	$self->config->load_from_files($self->env);
 }
 
 sub load_module ($self, $module_class, %args)

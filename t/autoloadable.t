@@ -1,5 +1,6 @@
 use v5.40;
 use Test2::V1 -ipP;
+use Thunderhorse::Test;
 
 ################################################################################
 # This tests whether autoloading works correctly

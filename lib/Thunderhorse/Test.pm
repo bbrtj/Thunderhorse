@@ -6,6 +6,10 @@ use Mooish::Base -standard;
 use Test2::V1;
 use PAGI::Test::Client;
 
+die 'Error: Thunderhorse::Test loaded in a PAGI environment'
+	if $ENV{PAGI_ENV};
+$ENV{PAGI_ENV} = 'test';
+
 has param 'app' => (
 	isa => InstanceOf ['Thunderhorse::App'],
 );
