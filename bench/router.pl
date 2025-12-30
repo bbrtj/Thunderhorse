@@ -69,12 +69,13 @@ my $m_c = Mojolicious::Controller->new;
 
 # use Data::Dumper;
 # print Dumper($k_r->match('/test/test2'));
-# print Dumper($m_m->find($m_c, {method => 'GET', path => '/test/test2'}));
+# print Dumper($m_m->find($m_c, {action => 'http.get', path => '/test/test2'}));
 # print Dumper($th_r->match('/test/test2'));
 
 cmpthese 200.01, {
-	mojo =>
-		sub { Mojolicious::Routes::Match->new(root => $m_r)->find($m_c, {method => 'GET', path => '/test/test2'}) },
+	mojo => sub {
+		Mojolicious::Routes::Match->new(root => $m_r)->find($m_c, {method => 'get', path => '/test/test2'});
+	},
 	thunderhorse => sub { $th_r->match('/test/test2') },
 	kelp => sub { $k_r->match('/test/test2') },
 };

@@ -17,7 +17,7 @@ extends 'Gears::App';
 
 has param 'env' => (
 	isa => Enum ['production', 'development', 'test'],
-	default => sub { $ENV{PAGI_ENV} },
+	default => sub { $ENV{PAGI_ENV} // 'production' },
 );
 
 has param 'initial_config' => (
@@ -138,7 +138,8 @@ async sub pagi ($self, $scope, $receive, $send)
 
 	my $req = $ctx->req;
 	my $router = $self->_router;
-	my $matches = $router->match($req->path, $req->method);
+	my $action = lc join '.', grep { defined } ($scope_type, $req->method);
+	my $matches = $router->match($req->path, $action);
 
 	await $self->pagi_loop($ctx, $matches->@*);
 

@@ -89,7 +89,7 @@ subtest 'should handle query parameter with multiple values' => sub {
 subtest 'should handle single form parameter' => sub {
 	$t->request(
 		'/post',
-		method => 'POST',
+		action => 'http.POST',
 		form => {foo => 'bar'},
 		)
 		->status_is(200)
@@ -100,7 +100,7 @@ subtest 'should handle single form parameter' => sub {
 subtest 'should handle multiple form parameters' => sub {
 	$t->request(
 		'/post',
-		method => 'POST',
+		action => 'http.POST',
 		form => {foo => 'bar', baz => 'qux'},
 		)
 		->status_is(200)
@@ -112,7 +112,7 @@ subtest 'should handle multiple form parameters' => sub {
 subtest 'should handle form parameter with multiple values' => sub {
 	$t->request(
 		'/post',
-		method => 'POST',
+		action => 'http.POST',
 		form => {foo => ['bar', 'baz']},
 		)
 		->status_is(200)
@@ -135,12 +135,12 @@ subtest 'should handle multiple header values' => sub {
 };
 
 subtest 'should handle headers together with form' => sub {
-	$t->request('/headers', method => 'POST', headers => {'x-multi' => 'value'}, form => {foo => 'bar'})
+	$t->request('/headers', action => 'http.POST', headers => {'x-multi' => 'value'}, form => {foo => 'bar'})
 		->status_is(200)
 		->body_like(qr/^x-multi: value$/m)
 		;
 
-	$t->request('/post', method => 'POST', headers => {'x-multi' => 'value'}, form => {foo => 'bar'})
+	$t->request('/post', action => 'http.POST', headers => {'x-multi' => 'value'}, form => {foo => 'bar'})
 		->status_is(200)
 		->body_like(qr/^foo: bar$/m)
 		;

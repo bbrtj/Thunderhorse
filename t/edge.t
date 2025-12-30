@@ -37,10 +37,10 @@ package EdgeApp {
 		$r->add('/order' => {to => sub { shift->stash_and_return(@_, 'last declared') }});
 		$r->add('/order' => {to => 'print_stash', order => 9});
 
-		# routes with normally catch all methods, but it is possible
-		# to specify a single method in router too
-		$r->add('/any_method' => {to => 'print_method'});
-		$r->add('/only_post' => {to => 'print_method', method => 'POST'});
+		# routes with normally catch all actions, but it is possible
+		# to specify a single action in router too
+		$r->add('/any_action' => {to => 'print_method'});
+		$r->add('/only_post' => {to => 'print_method', action => 'http.post'});
 	}
 
 	sub stash_and_return ($self, $ctx, $msg)
@@ -88,13 +88,13 @@ subtest 'should respect route ordering' => sub {
 		;
 };
 
-subtest 'should handle method-specific routing' => sub {
-	$t->request('/any_method', method => 'GET')
+subtest 'should handle action-specific routing' => sub {
+	$t->request('/any_action', method => 'GET')
 		->status_is(200)
 		->body_is('GET')
 		;
 
-	$t->request('/any_method', method => 'POST')
+	$t->request('/any_action', method => 'POST')
 		->status_is(200)
 		->body_is('POST')
 		;

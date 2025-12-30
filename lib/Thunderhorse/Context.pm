@@ -7,6 +7,7 @@ use Devel::StrictMode;
 
 use Thunderhorse::Request;
 use Thunderhorse::Response;
+use Thunderhorse::WebSocket;
 
 extends 'Gears::Context';
 
@@ -32,6 +33,13 @@ has field 'res' => (
 	default => sub ($self) { Thunderhorse::Response->new(context => $self) },
 );
 
+# NOTE: websocket must be lazy, because it will die if scope is not websocket
+has field 'ws' => (
+	(STRICT ? (isa => InstanceOf ['Thunderhorse::WebSocket']) : ()),
+	predicate => 1,
+	lazy => sub ($self) { Thunderhorse::WebSocket->new(context => $self) },
+);
+
 has field '_consumed' => (
 	(STRICT ? (isa => Bool) : ()),
 	writer => 1,
@@ -43,6 +51,8 @@ sub set_pagi ($self, $new)
 	$self->_set_pagi($new);
 	$self->req->update;
 	$self->res->update;
+	$self->ws->update
+		if $self->has_ws;
 }
 
 sub scope ($self)

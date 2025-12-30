@@ -30,6 +30,11 @@ has field 'response' => (
 	writer => 1,
 );
 
+has field 'websocket' => (
+	isa => InstanceOf ['PAGI::Test::WebSocket'],
+	writer => 1,
+);
+
 sub _build_test ($self)
 {
 	return PAGI::Test::Client->new(app => $self->app->run);
@@ -80,6 +85,80 @@ sub exception_like ($self, $wanted, $name = 'exception ok')
 {
 	T2->like($self->response->exception, $wanted, $name);
 
+	return $self;
+}
+
+## WEBSOCKET TESTING
+
+sub websocket_connect ($self, $path, %args)
+{
+	my $ws = $self->test->websocket($path, %args);
+	$self->set_websocket($ws);
+	return $self;
+}
+
+sub websocket_close ($self)
+{
+	$self->websocket->close unless $self->websocket->is_closed;
+	return $self;
+}
+
+sub ws_send_text ($self, $text)
+{
+	$self->websocket->send_text($text);
+	return $self;
+}
+
+sub ws_send_bytes ($self, $bytes)
+{
+	$self->websocket->send_bytes($bytes);
+	return $self;
+}
+
+sub ws_send_json ($self, $data)
+{
+	$self->websocket->send_json($data);
+	return $self;
+}
+
+sub ws_receive_text ($self)
+{
+	return $self->websocket->receive_text;
+}
+
+sub ws_receive_bytes ($self)
+{
+	return $self->websocket->receive_bytes;
+}
+
+sub ws_receive_json ($self)
+{
+	return $self->websocket->receive_json;
+}
+
+sub ws_text_is ($self, $wanted, $name = 'ws text ok')
+{
+	my $got = $self->ws_receive_text;
+	T2->is($got, $wanted, $name);
+	return $self;
+}
+
+sub ws_json_is ($self, $wanted, $name = 'ws json ok')
+{
+	my $got = $self->ws_receive_json;
+	T2->is($got, $wanted, $name);
+	return $self;
+}
+
+sub ws_closed_ok ($self, $name = 'ws closed ok')
+{
+	T2->ok($self->websocket->is_closed, $name);
+	return $self;
+}
+
+sub ws_connected_ok ($self, $name = 'ws connected ok')
+{
+	T2->ok(!$self->websocket->is_closed, $name);
 	return $self;
 }
 
