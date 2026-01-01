@@ -1,5 +1,5 @@
 use Test2::V1 -ipP;
-use Thunderhorse::Test;
+use Test2::Thunderhorse;
 use HTTP::Request::Common;
 
 ################################################################################
@@ -72,23 +72,21 @@ package TestC2 {
 	}
 }
 
-my $t = Thunderhorse::Test->new(app => ControllersApp->new);
+my $app = ControllersApp->new;
 
 subtest 'should route to a valid location' => sub {
-	$t->request(GET '/base')
-		->status_is(200)
-		->body_is('base: Thunderhorse::AppController')
-		;
+	http $app, GET '/base';
+	status_is 200;
+	body_is 'base: Thunderhorse::AppController';
 
-	$t->request(GET '/internal')
-		->status_is(200)
-		->body_is('internal: ControllersApp::Controller::Test')
-		;
+	http $app, GET '/internal';
+	status_is 200;
+	body_is 'internal: ControllersApp::Controller::Test';
 
-	$t->request(GET '/external')
-		->status_is(200)
-		->body_is('external: TestC2')
-		;
+	http $app, GET '/external';
+	status_is 200;
+	body_is 'external: TestC2';
 };
 
 done_testing;
+

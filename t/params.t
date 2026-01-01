@@ -1,5 +1,5 @@
 use Test2::V1 -ipP;
-use Thunderhorse::Test;
+use Test2::Thunderhorse;
 use HTTP::Request::Common;
 
 use Future::AsyncAwait;
@@ -63,76 +63,67 @@ package ParamsApp {
 	}
 };
 
-my $t = Thunderhorse::Test->new(app => ParamsApp->new);
+my $app = ParamsApp->new;
 
 subtest 'should handle single query parameter' => sub {
-	$t->request(GET '/get?foo=bar')
-		->status_is(200)
-		->body_like(qr/^foo: bar$/m)
-		;
+	http $app, GET '/get?foo=bar';
+	status_is 200;
+	like http->text, qr/^foo: bar$/m, 'body ok';
 };
 
 subtest 'should handle multiple query parameters' => sub {
-	$t->request(GET '/get?foo=bar&baz=qux')
-		->status_is(200)
-		->body_like(qr/^foo: bar$/m)
-		->body_like(qr/^baz: qux$/m)
-		;
+	http $app, GET '/get?foo=bar&baz=qux';
+	status_is 200;
+	like http->text, qr/^foo: bar$/m, 'body ok';
+	like http->text, qr/^baz: qux$/m, 'body ok';
 };
 
 subtest 'should handle query parameter with multiple values' => sub {
-	$t->request(GET '/get?foo=bar&foo=baz')
-		->status_is(200)
-		->body_like(qr/^foo: bar, baz$/m)
-		;
+	http $app, GET '/get?foo=bar&foo=baz';
+	status_is 200;
+	like http->text, qr/^foo: bar, baz$/m, 'body ok';
 };
 
 subtest 'should handle single form parameter' => sub {
-	$t->request(POST '/post', [foo => 'bar'])
-		->status_is(200)
-		->body_like(qr/^foo: bar$/m)
-		;
+	http $app, POST '/post', [foo => 'bar'];
+	status_is 200;
+	like http->text, qr/^foo: bar$/m, 'body ok';
 };
 
 subtest 'should handle multiple form parameters' => sub {
-	$t->request(POST '/post', [foo => 'bar', baz => 'qux'])
-		->status_is(200)
-		->body_like(qr/^foo: bar$/m)
-		->body_like(qr/^baz: qux$/m)
-		;
+	http $app, POST '/post', [foo => 'bar', baz => 'qux'];
+	status_is 200;
+	like http->text, qr/^foo: bar$/m, 'body ok';
+	like http->text, qr/^baz: qux$/m, 'body ok';
 };
 
 subtest 'should handle form parameter with multiple values' => sub {
-	$t->request(POST '/post', [foo => 'bar', foo => 'baz'])
-		->status_is(200)
-		->body_like(qr/^foo: bar, baz$/m)
-		;
+	http $app, POST '/post', [foo => 'bar', foo => 'baz'];
+	status_is 200;
+	like http->text, qr/^foo: bar, baz$/m, 'body ok';
 };
 
 subtest 'should handle custom headers' => sub {
-	$t->request(GET '/headers', 'x-custom-header' => 'test-value')
-		->status_is(200)
-		->body_like(qr/^x-custom-header: test-value$/m)
-		;
+	http $app, GET '/headers', 'x-custom-header' => 'test-value';
+	status_is 200;
+	like http->text, qr/^x-custom-header: test-value$/m, 'body ok';
 };
 
 subtest 'should handle multiple header values' => sub {
-	$t->request(GET '/headers', 'x-multi' => 'value1', 'x-multi' => 'value2')
-		->status_is(200)
-		->body_like(qr/^x-multi: value1, value2$/m)
-		;
+	http $app, GET '/headers', 'x-multi' => 'value1', 'x-multi' => 'value2';
+	status_is 200;
+	like http->text, qr/^x-multi: value1, value2$/m, 'body ok';
 };
 
 subtest 'should handle headers together with form' => sub {
-	$t->request(POST '/headers', [foo => 'bar'], 'x-multi' => 'value')
-		->status_is(200)
-		->body_like(qr/^x-multi: value$/m)
-		;
+	http $app, POST '/headers', [foo => 'bar'], 'x-multi' => 'value';
+	status_is 200;
+	like http->text, qr/^x-multi: value$/m, 'body ok';
 
-	$t->request(POST '/post', [foo => 'bar'], 'x-multi' => 'value')
-		->status_is(200)
-		->body_like(qr/^foo: bar$/m)
-		;
+	http $app, POST '/post', [foo => 'bar'], 'x-multi' => 'value';
+	status_is 200;
+	like http->text, qr/^foo: bar$/m, 'body ok';
 };
 
 done_testing;
+

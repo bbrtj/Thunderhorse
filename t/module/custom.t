@@ -1,6 +1,6 @@
 use v5.40;
 use Test2::V1 -ipP;
-use Thunderhorse::Test;
+use Test2::Thunderhorse;
 use HTTP::Request::Common;
 
 ################################################################################
@@ -44,13 +44,12 @@ package ModuleApp {
 	}
 }
 
-my $t = Thunderhorse::Test->new(app => ModuleApp->new);
+my $app = ModuleApp->new;
 
 subtest 'should have access to module method' => sub {
-	$t->request(GET '/test')
-		->status_is(200)
-		->body_is('custom: works')
-		;
+	http $app, GET '/test';
+	status_is 200;
+	body_is 'custom: works';
 };
 
 done_testing;

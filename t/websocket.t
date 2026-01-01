@@ -1,6 +1,6 @@
 use v5.40;
 use Test2::V1 -ipP;
-use Thunderhorse::Test;
+use Test2::Thunderhorse;
 
 use Future::AsyncAwait;
 
@@ -74,34 +74,33 @@ package WebSocketApp {
 	}
 };
 
-my $t = Thunderhorse::Test->new(app => WebSocketApp->new);
+my $app = WebSocketApp->new;
 
 subtest 'should echo text messages' => sub {
-	$t->websocket_connect('/echo')
-		->ws_connected_ok('websocket connected')
-		->ws_send_text('hello')
-		->ws_text_is('echo: hello')
-		->ws_send_text('world')
-		->ws_text_is('echo: world')
-		->websocket_close
-		->ws_closed_ok('websocket closed')
-		;
+	websocket $app, '/echo';
+
+	websocket->send_text('hello');
+	is websocket->receive_text, 'echo: hello', 'text response ok';
+
+	websocket->send_text('świecie');
+	is websocket->receive_text, 'echo: świecie', 'text response unicode ok';
+
+	websocket->close;
+	ok websocket->is_closed, 'closed ok';
 };
 
 subtest 'should echo json messages' => sub {
-	$t->websocket_connect('/json')
-		->ws_connected_ok('websocket connected')
-		->ws_send_json({action => 'test', value => 42})
-		->ws_json_is({action => 'test', value => 42, echoed => 1})
-		->websocket_close
-		;
+	websocket $app, '/json';
+
+	websocket->send_json({action => 'test', value => 42});
+	is websocket->receive_json, {action => 'test', value => 42, echoed => 1}, 'json response ok';
 };
 
 subtest 'should handle server initiated close' => sub {
-	$t->websocket_connect('/close')
-		->ws_send_text('trigger close')
-		->ws_closed_ok('server closed connection')
-		;
+	websocket $app, '/close';
+
+	websocket->send_text('trigger close');
+	ok websocket->is_closed, 'auto-closed ok';
 };
 
 done_testing;

@@ -1,6 +1,6 @@
 use v5.40;
 use Test2::V1 -ipP;
-use Thunderhorse::Test;
+use Test2::Thunderhorse;
 use HTTP::Request::Common;
 
 ################################################################################
@@ -74,12 +74,9 @@ subtest 'should load controllers from config' => sub {
 		},
 	);
 
-	my $t = Thunderhorse::Test->new(app => $app);
-
-	$t->request(GET '/from-config')
-		->status_is(200)
-		->body_is('controller: loaded')
-		;
+	http $app, GET '/from-config';
+	status_is 200;
+	body_is 'controller: loaded';
 };
 
 subtest 'should load modules from config' => sub {
@@ -93,12 +90,9 @@ subtest 'should load modules from config' => sub {
 		},
 	);
 
-	my $t = Thunderhorse::Test->new(app => $app);
-
-	$t->request(GET '/module-test')
-		->status_is(200)
-		->body_is('module: configured')
-		;
+	http $app, GET '/module-test';
+	status_is 200;
+	body_is 'module: configured';
 };
 
 subtest 'should load both controllers and modules from config' => sub {
@@ -115,17 +109,13 @@ subtest 'should load both controllers and modules from config' => sub {
 		},
 	);
 
-	my $t = Thunderhorse::Test->new(app => $app);
+	http $app, GET '/from-config';
+	status_is 200;
+	body_is 'controller: loaded';
 
-	$t->request(GET '/from-config')
-		->status_is(200)
-		->body_is('controller: loaded')
-		;
-
-	$t->request(GET '/module-test')
-		->status_is(200)
-		->body_is('module: combined')
-		;
+	http $app, GET '/module-test';
+	status_is 200;
+	body_is 'module: combined';
 };
 
 subtest 'should load from config file' => sub {
@@ -133,31 +123,23 @@ subtest 'should load from config file' => sub {
 		initial_config => 't/config/loading',
 	);
 
-	my $t = Thunderhorse::Test->new(app => $app);
+	http $app, GET '/from-config';
+	status_is 200;
+	body_is 'controller: loaded';
 
-	$t->request(GET '/from-config')
-		->status_is(200)
-		->body_is('controller: loaded')
-		;
-
-	$t->request(GET '/module-test')
-		->status_is(200)
-		->body_is('module: from_file')
-		;
+	http $app, GET '/module-test';
+	status_is 200;
+	body_is 'module: from_file';
 };
 
 subtest 'should handle empty config gracefully' => sub {
 	my $app = ConfigApp->new;
 
-	my $t = Thunderhorse::Test->new(app => $app, raise_exceptions => false);
+	http $app, GET '/from-config';
+	status_is 404;
 
-	$t->request(GET '/from-config')
-		->status_is(404)
-		;
-
-	$t->request(GET '/module-test')
-		->status_is(500)
-		;
+	http $app, GET '/module-test';
+	status_is 500;
 };
 
 done_testing;

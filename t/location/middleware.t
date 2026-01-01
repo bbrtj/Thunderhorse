@@ -1,6 +1,6 @@
 use v5.40;
 use Test2::V1 -ipP;
-use Thunderhorse::Test;
+use Test2::Thunderhorse;
 use HTTP::Request::Common;
 
 use Future::AsyncAwait;
@@ -106,14 +106,13 @@ package MiddlewareApp {
 	}
 };
 
-my $t = Thunderhorse::Test->new(app => MiddlewareApp->new);
+my $app = MiddlewareApp->new;
 
 subtest 'should execute bridge middleware before nested middleware and route' => sub {
 	@order = ();
-	$t->request(GET '/with-middleware/nested')
-		->status_is(200)
-		->body_is('nested route')
-		;
+	http $app, GET '/with-middleware/nested';
+	status_is 200;
+	body_is 'nested route';
 
 	is \@order, ['bridge-mw', 'bridge-handler', 'nested-mw', 'nested-route'],
 		'middlewares execute in correct order';
@@ -121,10 +120,9 @@ subtest 'should execute bridge middleware before nested middleware and route' =>
 
 subtest 'should execute bridge middleware before inherited route' => sub {
 	@order = ();
-	$t->request(GET '/with-middleware/inherited')
-		->status_is(200)
-		->body_is('inherited route')
-		;
+	http $app, GET '/with-middleware/inherited';
+	status_is 200;
+	body_is 'inherited route';
 
 	is \@order, ['bridge-mw', 'bridge-handler', 'inherited-route'],
 		'bridge middleware executes before inherited route';
@@ -132,21 +130,19 @@ subtest 'should execute bridge middleware before inherited route' => sub {
 
 subtest 'should execute route with no middleware' => sub {
 	@order = ();
-	$t->request(GET '/no-middleware')
-		->status_is(200)
-		->body_is('plain route')
-		;
+	http $app, GET '/no-middleware';
+	status_is 200;
+	body_is 'plain route';
 
 	is \@order, ['plain-route'], 'no middleware executed';
 };
 
 subtest 'should have ContentLength header' => sub {
 	@order = ();
-	$t->request(GET '/content-length')
-		->status_is(200)
-		->header_is('Content-Length', 19)
-		->body_is('content length test')
-		;
+	http $app, GET '/content-length';
+	status_is 200;
+	header_is 'Content-Length', 19;
+	body_is 'content length test';
 };
 
 done_testing;

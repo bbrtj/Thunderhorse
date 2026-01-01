@@ -1,6 +1,6 @@
 use v5.40;
 use Test2::V1 -ipP;
-use Thunderhorse::Test;
+use Test2::Thunderhorse;
 
 use Future::AsyncAwait;
 
@@ -91,49 +91,46 @@ package SSETestApp {
 	}
 };
 
-my $t = Thunderhorse::Test->new(app => SSETestApp->new);
+my $app = SSETestApp->new;
+
+subtest 'should handle client disconnect' => sub {
+	sse $app, '/close';
+
+	is sse->receive_event->{data}, 'start', 'start message ok';
+
+	sse->close;
+	ok sse->is_closed, 'closed ok';
+};
 
 subtest 'should send simple text events' => sub {
-	$t->sse_connect('/simple')
-		->sse_data_is('hello', 'first message')
-		->sse_data_is('world', 'second message')
-		->sse_close
-		;
+	sse $app, '/simple';
+
+	is sse->receive_event->{data}, 'hello', 'first message ok';
+	is sse->receive_event->{data}, 'world', 'second message ok';
 };
 
 subtest 'should send json events' => sub {
-	$t->sse_connect('/json')
-		->sse_json_is({message => 'first', count => 1}, 'first json')
-		->sse_json_is({message => 'second', count => 2}, 'second json')
-		->sse_close
-		;
+	sse $app, '/json';
+
+	is sse->receive_json, {message => 'first', count => 1}, 'first json ok';
+	is sse->receive_json, {message => 'second', count => 2}, 'second json ok';
 };
 
 subtest 'should send events with metadata' => sub {
-	$t->sse_connect('/counter');
+	sse $app, '/counter';
 
-	my $event1 = $t->sse_receive_event;
+	my $event1 = sse->receive_event;
 	is $event1->{data}, 'Message 1', 'first message data';
 	is $event1->{event}, 'counter', 'first message event type';
 	is $event1->{id}, 1, 'first message id';
 
-	my $event2 = $t->sse_receive_event;
+	my $event2 = sse->receive_event;
 	is $event2->{data}, 'Message 2', 'second message data';
 	is $event2->{id}, 2, 'second message id';
 
-	my $event3 = $t->sse_receive_event;
+	my $event3 = sse->receive_event;
 	is $event3->{data}, 'Message 3', 'third message data';
 	is $event3->{id}, 3, 'third message id';
-
-	$t->sse_close;
-};
-
-subtest 'should handle client disconnect' => sub {
-	$t->sse_connect('/close')
-		->sse_data_is('start', 'received start message')
-		->sse_close
-		->sse_closed_ok('connection closed')
-		;
 };
 
 done_testing;

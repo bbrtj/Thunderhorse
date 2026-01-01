@@ -1,6 +1,6 @@
 use v5.40;
 use Test2::V1 -ipP;
-use Thunderhorse::Test;
+use Test2::Thunderhorse;
 use HTTP::Request::Common;
 
 ################################################################################
@@ -58,33 +58,29 @@ package TemplateApp {
 	}
 }
 
-my $t = Thunderhorse::Test->new(app => TemplateApp->new);
+my $app = TemplateApp->new;
 
 subtest 'should render template from file with wrapper' => sub {
-	$t->request(GET '/test')
-		->status_is(200)
-		->header_is('Content-Type', 'text/html; charset=utf-8')
-		->body_like(qr{^zażółć gęślą jaźń Hello World!\v+$})
-		;
+	http $app, GET '/test';
+	status_is 200;
+	header_is 'Content-Type', 'text/html; charset=utf-8';
+	like http->text, qr{^zażółć gęślą jaźń Hello World!\v+$}, 'body ok';
 };
 
 subtest 'should render inline template' => sub {
-	$t->request(GET '/test-inline')
-		->status_is(200)
-		->body_is('Hello Inline!')
-		;
+	http $app, GET '/test-inline';
+	status_is 200;
+	body_is 'Hello Inline!';
 };
 
 subtest 'should render DATA template' => sub {
-	$t->request(GET '/test-data')
-		->status_is(200)
-		->body_like(qr{^Data contents\v+$})
-		;
+	http $app, GET '/test-data';
+	status_is 200;
+	like http->text, qr{^Data contents\v+$}, 'body ok';
 
 	# again - test handle rewinding
-	$t->request(GET '/test-data')
-		->body_like(qr{^Data contents\v+$})
-		;
+	http $app, GET '/test-data';
+	like http->text, qr{^Data contents\v+$}, 'body ok';
 };
 
 done_testing;

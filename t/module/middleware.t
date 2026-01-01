@@ -1,6 +1,6 @@
 use v5.40;
 use Test2::V1 -ipP;
-use Thunderhorse::Test;
+use Test2::Thunderhorse;
 use Future::AsyncAwait;
 use HTTP::Request::Common;
 
@@ -212,13 +212,12 @@ package PAGIMiddlewareApp {
 }
 
 subtest 'should execute middleware in order based on order config' => sub {
-	my $t = Thunderhorse::Test->new(app => MiddlewareModuleApp->new);
+	my $app = MiddlewareModuleApp->new;
 
 	@execution_order = ();
-	$t->request(GET '/test')
-		->status_is(200)
-		->body_is('success')
-		;
+	http $app, GET '/test';
+	status_is 200;
+	body_is 'success';
 
 	# Order should be: mw3 (5), mw1 (10), mw2 (20), then handler, then unwinding
 	is \@execution_order, [
@@ -234,13 +233,12 @@ subtest 'should execute middleware in order based on order config' => sub {
 };
 
 subtest 'should execute middleware alphabetically when no order specified' => sub {
-	my $t = Thunderhorse::Test->new(app => AlphabeticalMiddlewareApp->new);
+	my $app = AlphabeticalMiddlewareApp->new;
 
 	@execution_order = ();
-	$t->request(GET '/test')
-		->status_is(200)
-		->body_is('alphabetical')
-		;
+	http $app, GET '/test';
+	status_is 200;
+	body_is 'alphabetical';
 
 	# Should be alphabetical by key name
 	is \@execution_order, [
@@ -256,13 +254,12 @@ subtest 'should execute middleware alphabetically when no order specified' => su
 };
 
 subtest 'should handle mixed order specifications correctly' => sub {
-	my $t = Thunderhorse::Test->new(app => MixedOrderMiddlewareApp->new);
+	my $app = MixedOrderMiddlewareApp->new;
 
 	@execution_order = ();
-	$t->request(GET '/test')
-		->status_is(200)
-		->body_is('mixed')
-		;
+	http $app, GET '/test';
+	status_is 200;
+	body_is 'mixed';
 
 	# Order: default-0 (0), explicit-50 (50), explicit-100 (100)
 	is \@execution_order, [
@@ -278,14 +275,13 @@ subtest 'should handle mixed order specifications correctly' => sub {
 };
 
 subtest 'should load PAGI::Middleware without prefix and execute in order' => sub {
-	my $t = Thunderhorse::Test->new(app => PAGIMiddlewareApp->new);
+	my $app = PAGIMiddlewareApp->new;
 
 	@execution_order = ();
-	$t->request(GET '/test')
-		->status_is(200)
-		->header_is('Content-Length', 9)
-		->body_is('test body')
-		;
+	http $app, GET '/test';
+	status_is 200;
+	header_is 'Content-Length', 9;
+	body_is 'test body';
 
 	# Custom middleware (order 5) should execute before ContentLength (order 10)
 	is \@execution_order, [

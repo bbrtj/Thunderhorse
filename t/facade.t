@@ -1,6 +1,6 @@
 use v5.40;
 use Test2::V1 -ipP;
-use Thunderhorse::Test;
+use Test2::Thunderhorse;
 use HTTP::Request::Common;
 
 ################################################################################
@@ -82,31 +82,25 @@ package FacadeApp {
 	}
 }
 
-my $t = Thunderhorse::Test->new(app => FacadeApp->new);
+my $app = FacadeApp->new;
 
 subtest 'should render /good' => sub {
-	$t->request(GET '/good')
-		->status_is(200)
-		->header_is('Content-Type', 'text/plain; charset=utf-8')
-		->body_is('Something')
-		;
+	http $app, GET '/good';
+	status_is 200;
+	header_is 'Content-Type', 'text/plain; charset=utf-8';
+	body_is 'Something';
 };
 
 subtest 'should not render /consumed' => sub {
 	like dies {
-		$t->request(GET '/consumed');
+		http $app, GET '/consumed';
 	}, qr/\QDid you forget to 'await'\E/, 'exception ok';
 };
 
 subtest 'should not render /bad' => sub {
-	$t->set_raise_exceptions(false);
-
-	$t->request(GET '/bad')
-		->status_is(500)
-		->exception_like(qr/\Qforgot await?\E/)
-		;
-
-	$t->set_raise_exceptions(true);
+	http $app, GET '/bad';
+	status_is 500;
+	like http->exception, qr/\Qforgot await?\E/, 'exception ok';
 };
 
 done_testing;

@@ -1,6 +1,6 @@
 use v5.40;
 use Test2::V1 -ipP;
-use Thunderhorse::Test;
+use Test2::Thunderhorse;
 use HTTP::Request::Common;
 
 ################################################################################
@@ -69,55 +69,50 @@ package BasicApp {
 	}
 };
 
-my $t = Thunderhorse::Test->new(app => BasicApp->new);
+my $app = BasicApp->new;
 
 subtest 'should route to a valid location' => sub {
-	$t->request(GET '/foundation/placeholder')
-		->status_is(200)
-		->header_is('Content-Type', 'text/html; charset=utf-8')
-		->body_is('Thunderhorse::AppController;Thunderhorse::Context::Facade;placeholder')
-		;
+	http $app, GET '/foundation/placeholder';
+	status_is 200;
+	header_is 'content-type', 'text/html; charset=utf-8';
+	body_is 'Thunderhorse::AppController;Thunderhorse::Context::Facade;placeholder';
 };
 
 subtest 'should route to 404' => sub {
-	$t->request(GET '/foundation/')
-		->status_is(404)
-		->header_is('Content-Type', 'text/plain; charset=utf-8')
-		->body_is('Not Found')
-		;
+	http $app, GET '/foundation';
+	status_is 404;
+	header_is 'Content-Type', 'text/plain; charset=utf-8';
+	body_is 'Not Found';
 };
 
 subtest 'should render text set by res->text' => sub {
-	$t->request(GET '/send')
-		->status_is(200)
-		->header_is('Content-Type', 'text/plain; charset=utf-8')
-		->body_is('this gets rendered')
-		;
+	http $app, GET '/send';
+	status_is 200;
+	header_is 'Content-Type', 'text/plain; charset=utf-8';
+	body_is 'this gets rendered';
 };
 
 subtest 'should pass bridge and reach success route' => sub {
-	$t->request(GET '/bridge/0/success')
-		->status_is(200)
-		->header_is('Content-Type', 'text/html; charset=utf-8')
-		->body_is('bridge passed')
-		;
+	http $app, GET '/bridge/0/success';
+	status_is 200;
+	header_is 'Content-Type', 'text/html; charset=utf-8';
+	body_is 'bridge passed';
 };
 
 subtest 'should fail bridge and return 403' => sub {
-	$t->request(GET '/bridge/1/success')
-		->status_is(403)
-		->header_is('Content-Type', 'text/plain; charset=utf-8')
-		# TODO: ->body_is('Forbidden')
-		->body_is('Error')
-		;
+	http $app, GET '/bridge/1/success';
+	status_is 403;
+	header_is 'Content-Type', 'text/plain; charset=utf-8';
+	# TODO: body_is('Forbidden')
+	body_is 'Error';
 };
 
 subtest 'should pass unimplemented bridge' => sub {
-	$t->request(GET '/bridge2/success')
-		->status_is(200)
-		->header_is('Content-Type', 'text/html; charset=utf-8')
-		->body_is('bridge passed')
-		;
+	http $app, GET '/bridge2/success';
+	status_is 200;
+	header_is 'Content-Type', 'text/html; charset=utf-8';
+	body_is 'bridge passed';
 };
 
 done_testing;
+

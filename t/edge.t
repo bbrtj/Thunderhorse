@@ -1,5 +1,5 @@
 use Test2::V1 -ipP;
-use Thunderhorse::Test;
+use Test2::Thunderhorse;
 use HTTP::Request::Common;
 
 ################################################################################
@@ -61,13 +61,12 @@ package EdgeApp {
 	}
 };
 
-my $t = Thunderhorse::Test->new(app => EdgeApp->new);
+my $app = EdgeApp->new;
 
 subtest 'should handle multiple locations for the same route' => sub {
-	$t->request(GET '/multi')
-		->status_is(200)
-		->body_is('this gets rendered')
-		;
+	http $app, GET '/multi';
+	status_is 200;
+	body_is 'this gets rendered';
 };
 
 subtest 'should respect route ordering' => sub {
@@ -83,31 +82,27 @@ subtest 'should respect route ordering' => sub {
 		'after all',
 	);
 
-	$t->request(GET '/order')
-		->status_is(200)
-		->body_is(join ' -> ', @order)
-		;
+	http $app, GET '/order';
+	status_is 200;
+	body_is join ' -> ', @order;
 };
 
 subtest 'should handle action-specific routing' => sub {
-	$t->request(GET '/any_action')
-		->status_is(200)
-		->body_is('GET')
-		;
+	http $app, GET '/any_action';
+	status_is 200;
+	body_is 'GET';
 
-	$t->request(POST '/any_action')
-		->status_is(200)
-		->body_is('POST')
-		;
+	http $app, POST '/any_action';
+	status_is 200;
+	body_is 'POST';
 
-	$t->request(GET '/only_post')
-		->status_is(404)
-		;
+	http $app, GET '/only_post';
+	status_is 404;
 
-	$t->request(POST '/only_post')
-		->status_is(200)
-		->body_is('POST')
-		;
+	http $app, POST '/only_post';
+	status_is 200;
+	body_is 'POST';
 };
 
 done_testing;
+
