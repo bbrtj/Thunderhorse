@@ -11,7 +11,12 @@ use HTTP::Status qw(status_message);
 extends 'Gears::Router::Location::SigilMatch';
 
 has option 'action' => (
-	coerce => LowerCaseStr,
+	isa => Str,
+);
+
+has field '_action_re' => (
+	isa => RegexpRef,
+	lazy => 1,
 );
 
 has param 'name' => (
@@ -55,6 +60,15 @@ sub BUILD ($self, $)
 
 	# register the route in the router
 	$self->router->_register_location($self->name, $self);
+}
+
+sub _build_action_re ($self)
+{
+	my ($scope, $method) = split /\./, $self->action;
+	$scope = $scope eq '*' ? qr{[^.]+} : quotemeta $scope;
+	$method = ($method // '*') eq '*' ? qr{(\.[^.]+)?} : quotemeta ".$method";
+
+	return qr{^$scope$method$};
 }
 
 sub _build_name ($self)
@@ -148,7 +162,7 @@ sub get_destination ($self)
 
 sub compare ($self, $path, $action)
 {
-	return undef if $self->has_action && $self->action ne $action;
+	return undef if $self->has_action && $action !~ $self->_action_re;
 	return $self->SUPER::compare($path);
 }
 

@@ -46,7 +46,7 @@ my $th_a = Thunderhorse::App->new(
 	),
 );
 my $th_r = $th_a->router;
-$th_r->add('/test')->add('/:sth');
+$th_r->add('/test')->add('/:sth' => {action => 'http.*'});
 my $th_admin = $th_r->add('/admin');
 for (1 .. 20) {
 	$th_admin->add("/route$_");
@@ -59,8 +59,9 @@ for (1 .. 20) {
 	$k_admin->add("/route$_" => {to => sub { }});
 }
 
+# NOTE: this way of using mojo does not use caching at all
 my $m_r = Mojolicious::Routes->new(cache => $m_cache);
-$m_r->under('/test')->get('/:sth');
+$m_r->under('/test')->get([GET => '/:sth']);
 my $m_admin = $m_r->under('/admin');
 for (1 .. 20) {
 	$m_admin->get("/route$_");
@@ -76,7 +77,7 @@ cmpthese 200.01, {
 	mojo => sub {
 		Mojolicious::Routes::Match->new(root => $m_r)->find($m_c, {method => 'get', path => '/test/test2'});
 	},
-	thunderhorse => sub { $th_r->match('/test/test2') },
-	kelp => sub { $k_r->match('/test/test2') },
+	thunderhorse => sub { $th_r->match('/test/test2', 'http.get') },
+	kelp => sub { $k_r->match('/test/test2', 'get') },
 };
 
