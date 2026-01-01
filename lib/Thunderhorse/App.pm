@@ -10,6 +10,7 @@ use Thunderhorse::Router;
 use Thunderhorse::Controller;
 use Thunderhorse::AppController;
 
+use HTTP::Status qw(status_message);
 use IO::Async::Loop;
 use Future::AsyncAwait;
 
@@ -144,7 +145,7 @@ async sub pagi ($self, $scope, $receive, $send)
 	await $self->pagi_loop($ctx, $matches->@*);
 
 	if (!$ctx->is_consumed) {
-		await $ctx->res->status(404)->text('Not Found');
+		await $ctx->res->status(404)->text(status_message(404));
 	}
 
 	return;

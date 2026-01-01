@@ -3,8 +3,10 @@ package Thunderhorse::Router::Location;
 use v5.40;
 use Mooish::Base -standard;
 
-use Future::AsyncAwait;
 use Gears::X::Thunderhorse;
+
+use Future::AsyncAwait;
+use HTTP::Status qw(status_message);
 
 extends 'Gears::Router::Location::SigilMatch';
 
@@ -116,8 +118,7 @@ sub _build_pagi_app ($self)
 				}
 				catch ($ex) {
 					die $ex unless $ex isa 'Gears::X::HTTP';
-					# TODO: proper message
-					await $ctx->res->status($ex->code)->text('Error')
+					await $ctx->res->status($ex->code)->text(status_message($ex->code))
 					# TODO: log $ex->message
 				}
 			}
