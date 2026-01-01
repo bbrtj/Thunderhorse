@@ -117,9 +117,7 @@ sub _build_pagi_app ($self)
 					}
 				}
 				catch ($ex) {
-					die $ex unless $ex isa 'Gears::X::HTTP';
-					await $ctx->res->status($ex->code)->text(status_message($ex->code))
-					# TODO: log $ex->message
+					await $controller->on_error($ctx, $ex);
 				}
 			}
 

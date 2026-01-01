@@ -38,3 +38,13 @@ sub _can_method ($self, $method)
 	return exists $self->app->extra_methods->{controller}{$method};
 }
 
+sub render_error ($self, $ctx, $code, $message = undef)
+{
+	$self->app->render_error($self, $ctx, $code, $message);
+}
+
+sub on_error ($self, $ctx, $error)
+{
+	$self->app->on_error($self, $ctx, $error);
+}
+

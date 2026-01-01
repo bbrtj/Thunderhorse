@@ -66,6 +66,11 @@ has field 'extra_wrappers' => (
 	default => sub { [] },
 );
 
+sub is_production ($self)
+{
+	return $self->env eq 'production';
+}
+
 sub _build_app_controller ($self)
 {
 	return $self->_build_controller('Thunderhorse::AppController');
@@ -145,7 +150,7 @@ async sub pagi ($self, $scope, $receive, $send)
 	await $self->pagi_loop($ctx, $matches->@*);
 
 	if (!$ctx->is_consumed) {
-		await $ctx->res->status(404)->text(status_message(404));
+		await $self->render_error(undef, $ctx, 404);
 	}
 
 	return;
@@ -189,5 +194,17 @@ sub run ($self)
 	}
 
 	return $pagi;
+}
+
+async sub render_error ($self, $controller, $ctx, $code, $message = undef)
+{
+	$message = defined $message && $self->is_production ? $message : status_message($code);
+	await $ctx->res->status($code)->text($message);
+}
+
+async sub on_error ($self, $controller, $ctx, $error)
+{
+	die $error unless $error isa 'Gears::X::HTTP';
+	await +($controller // $self->controller)->render_error($ctx, $error->code);
 }
 
