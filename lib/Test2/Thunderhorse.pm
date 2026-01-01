@@ -39,6 +39,9 @@ sub _build_client ($app)
 		$args{app} = $app->run;
 	}
 
+	$args{raise_app_exceptions} = true
+		unless exists $args{raise_app_exceptions};
+
 	return PAGI::Test::Client->new(%args);
 }
 

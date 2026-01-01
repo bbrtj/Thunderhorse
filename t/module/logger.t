@@ -69,7 +69,7 @@ subtest 'should have access to log method' => sub {
 subtest 'should catch and log errors' => sub {
 	$appender->buffer('');    # Clear buffer
 
-	http $app, GET '/test-error';
+	http [$app, raise_app_exceptions => false], GET '/test-error';
 	http_status_is 500;
 
 	my $buffer = $appender->buffer();

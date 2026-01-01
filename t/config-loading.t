@@ -138,7 +138,7 @@ subtest 'should handle empty config gracefully' => sub {
 	http $app, GET '/from-config';
 	http_status_is 404;
 
-	http $app, GET '/module-test';
+	http [$app, raise_app_exceptions => false], GET '/module-test';
 	http_status_is 500;
 };
 

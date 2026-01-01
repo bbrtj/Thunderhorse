@@ -103,7 +103,7 @@ subtest 'should fail bridge and return 403' => sub {
 	http $app, GET '/bridge/1/success';
 	http_status_is 403;
 	http_header_is 'Content-Type', 'text/plain; charset=utf-8';
-	http_text_is('Forbidden')
+	http_text_is('Forbidden');
 };
 
 subtest 'should pass unimplemented bridge' => sub {
