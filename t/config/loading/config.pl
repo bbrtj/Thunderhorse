@@ -4,7 +4,8 @@ return {
 	],
 	modules => {
 		'^LoadingTestModule' => {
-			test_option => 'from_file',
+			test_option => app->sth,
 		},
 	},
 };
+

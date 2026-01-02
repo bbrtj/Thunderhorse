@@ -63,6 +63,11 @@ package ConfigApp {
 	{
 		return $self->module_method;
 	}
+
+	sub sth
+	{
+		return 'sth';
+	}
 }
 
 subtest 'should load controllers from config' => sub {
@@ -129,7 +134,7 @@ subtest 'should load from config file' => sub {
 
 	http $app, GET '/module-test';
 	http_status_is 200;
-	http_text_is 'module: from_file';
+	http_text_is 'module: sth';
 };
 
 subtest 'should handle empty config gracefully' => sub {

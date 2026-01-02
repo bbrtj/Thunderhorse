@@ -53,7 +53,7 @@ has extended 'router' => (
 );
 
 has extended 'config' => (
-	default => sub { Thunderhorse::Config->new },
+	builder => 1,
 );
 
 has field 'modules' => (
@@ -78,6 +78,22 @@ has field 'extra_wrappers' => (
 sub is_production ($self)
 {
 	return $self->env eq 'production';
+}
+
+sub _build_config ($self)
+{
+	my $conf = Thunderhorse::Config->new;
+	foreach my $reader ($conf->readers->@*) {
+		next unless $reader isa 'Gears::Config::Reader::PerlScript';
+
+		# make app available from .pl config files
+		$reader->declared_vars->%* = (
+			$reader->declared_vars->%*,
+			app => $self,
+		);
+	}
+
+	return $conf;
 }
 
 sub _build_app_controller ($self)
