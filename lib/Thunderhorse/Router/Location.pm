@@ -120,8 +120,7 @@ sub _build_pagi_app ($self)
 
 					if (!$ctx->is_consumed) {
 						if (defined $result) {
-							# TODO: result should be an array? (status, content_type, content)
-							await $ctx->res->status(200)->html($result);
+							await $ctx->res->status_try(200)->content_type_try('text/html')->send($result);
 						}
 						else {
 							weaken $facade;

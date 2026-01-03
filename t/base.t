@@ -45,6 +45,18 @@ package BasicApp {
 			}
 		);
 
+		$router->add(
+			'/preset_headers/?ex_code' => {
+				to => sub ($self, $ctx, $code) {
+					$ctx->res->status(201)->content_type('application/xml');
+					Gears::X::HTTP->raise($code, 'test')
+						if $code;
+
+					return 'this gets rendered as xml';
+				}
+			}
+		);
+
 		my $bridge = $router->add(
 			'/bridge/:must_be_zero' => {
 				to => sub ($self, $ctx, $must_be_zero) {
@@ -122,6 +134,20 @@ subtest 'should render text set by res->text' => sub {
 	http_status_is 200;
 	http_header_is 'Content-Type', 'text/plain; charset=utf-8';
 	http_text_is 'this gets rendered';
+};
+
+subtest 'should render without overriding set headers' => sub {
+	http $app, GET '/preset_headers';
+	http_status_is 201;
+	http_header_is 'content-type', 'application/xml; charset=utf-8';
+	http_text_is 'this gets rendered as xml';
+};
+
+subtest 'should override headers when an exception is thrown' => sub {
+	http $app, GET '/preset_headers/403';
+	http_status_is 403;
+	http_header_is 'content-type', 'text/plain; charset=utf-8';
+	http_text_is 'Forbidden';
 };
 
 subtest 'should pass bridge and reach success route' => sub {
