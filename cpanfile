@@ -12,4 +12,6 @@ requires 'JSON::MaybeXS' => 0;
 requires 'Log::Handler' => 0;
 requires 'Template::Toolkit' => 0;
 requires 'HTTP::Message' => 0;
+requires 'Devel::StrictMode' => 0;
+requires 'Path::Tiny' => 0;
 
