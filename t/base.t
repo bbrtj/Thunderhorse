@@ -110,9 +110,8 @@ subtest 'should handle lifespan events' => sub {
 	ok $app->events->{startup}, 'startup ok';
 	ok $app->events->{shutdown}, 'shutdown ok';
 
-	# TODO: PAGI::Middleware uses wrong state
-	# ok $state->{th_started}, 'startup hook ok';
-	# ok $state->{th_stopped}, 'shutdown hook ok';
+	ok $state->{th_started}, 'startup state ok';
+	ok $state->{th_stopped}, 'shutdown state ok';
 };
 
 subtest 'should route to a valid location' => sub {

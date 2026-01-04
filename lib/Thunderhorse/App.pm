@@ -14,7 +14,7 @@ use Path::Tiny;
 use HTTP::Status qw(status_message);
 use IO::Async::Loop;
 use Future::AsyncAwait;
-use PAGI::Lifespan;
+use PAGI::Utils qw(handle_lifespan);
 use FindBin;
 
 extends 'Gears::App';
@@ -172,6 +172,13 @@ sub load_module ($self, $module_class, $args = {})
 async sub pagi ($self, $scope, $receive, $send)
 {
 	my $scope_type = $scope->{type};
+
+	return await handle_lifespan(
+		$scope, $receive, $send,
+		startup => sub { $self->on_startup(@_) },
+		shutdown => sub { $self->on_shutdown(@_) },
+	) if $scope_type eq 'lifespan';
+
 	die 'Unsupported scope type'
 		unless $scope_type =~ m/^(http|sse|websocket)$/;
 
@@ -218,12 +225,6 @@ sub run ($self)
 	my $pagi = sub (@args) {
 		return $self->pagi(@args);
 	};
-
-	$pagi = PAGI::Lifespan->wrap(
-		$pagi,
-		startup => sub { $self->on_startup(@_) },
-		shutdown => sub { $self->on_shutdown(@_) },
-	);
 
 	foreach my $mw ($self->extra_wrappers->@*) {
 		if (ref $mw eq 'CODE') {
