@@ -17,7 +17,7 @@ First ...
 
 	sub build ($self)
 	{
-		$self->routes->add('/hello/:name', { to => 'greet' });
+		$self->router->add('/hello/:name', { to => 'greet' });
 	}
 
 	sub greet ($self, $ctx, $name)
