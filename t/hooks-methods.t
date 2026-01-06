@@ -6,7 +6,7 @@ use HTTP::Request::Common;
 use Future::AsyncAwait;
 
 ################################################################################
-# This tests whether render_error and on_error hooks work correctly
+# This tests whether hooks and handlers are fired correctly
 ################################################################################
 
 package HooksApp {
@@ -51,6 +51,16 @@ package HooksApp {
 		$self->set_on_error_called($self->on_error_called + 1);
 		die $error unless $error isa 'Gears::X::HTTP';
 		await +($controller // $self->controller)->render_error($ctx, $error->code, "app caught: " . $error->code);
+	}
+
+	async sub on_startup ($self, $state)
+	{
+		$state->{th_started} = true;
+	}
+
+	async sub on_shutdown ($self, $state)
+	{
+		$state->{th_stopped} = true;
 	}
 };
 
@@ -128,6 +138,14 @@ package HooksApp::Controller::Default {
 		Gears::X::HTTP->raise(401, 'unauthorized');
 	}
 }
+
+subtest 'should handle lifespan events' => sub {
+	my $app = HooksApp->new;
+	my $state = pagi_run $app, sub { };
+
+	ok $state->{th_started}, 'startup state ok';
+	ok $state->{th_stopped}, 'shutdown state ok';
+};
 
 subtest 'should use controller custom hooks for exceptions' => sub {
 	my $app = HooksApp->new;

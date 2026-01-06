@@ -816,6 +816,10 @@ They are useful if you need to perform some extra internal tasks when an event
 is fired, without modifying how event will be handled. This is especially
 useful when developing a Thunderhorse module.
 
+I<Note:> since hooks are stored in the application's instance, avoid creating a
+strong reference cycle in memory by calling C<weaken> on all references to the
+application's instance (for example by weakening C<$self> in C<build> method).
+
 =back
 
 Thunderhorse defines a closed set of supported hooks:

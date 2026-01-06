@@ -17,10 +17,6 @@ package BasicApp {
 
 	extends 'Thunderhorse::App';
 
-	has field 'events' => (
-		default => sub { {} },
-	);
-
 	sub build ($self)
 	{
 		my $router = $self->router;
@@ -95,18 +91,6 @@ package BasicApp {
 			},
 		);
 	}
-
-	async sub on_startup ($self, $state)
-	{
-		$self->events->{startup} = true;
-		$state->{th_started} = true;
-	}
-
-	async sub on_shutdown ($self, $state)
-	{
-		$self->events->{shutdown} = true;
-		$state->{th_stopped} = true;
-	}
 };
 
 package BasicAppProd {
@@ -126,16 +110,6 @@ my $app = BasicApp->new;
 my $app_prod = BasicAppProd->new;
 
 is $app->path->stringify, cwd->child('t')->stringify, 'application path ok';
-
-subtest 'should handle lifespan events' => sub {
-	my $state = pagi_run $app, sub { };
-
-	ok $app->events->{startup}, 'startup ok';
-	ok $app->events->{shutdown}, 'shutdown ok';
-
-	ok $state->{th_started}, 'startup state ok';
-	ok $state->{th_stopped}, 'shutdown state ok';
-};
 
 subtest 'should route to a valid location' => sub {
 	http $app, GET '/foundation/placeholder';
