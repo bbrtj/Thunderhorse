@@ -673,7 +673,7 @@ instead of merging it.
 	# override config
 	{ '=controllers' => ['Admin', 'API'] }
 
-	# result: duplicates are applied
+	# result: config is overridden
 	{ controllers => ['Admin', 'API'] }
 
 =item * C<+key> - Add
