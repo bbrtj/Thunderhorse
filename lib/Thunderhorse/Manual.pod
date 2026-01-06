@@ -52,6 +52,36 @@ well-organized system. It is also based on perl 5.40 and uses modern syntax
 features in its core, which allows it to further reduce the set of required
 dependencies and keep the core small.
 
+=head2 Thunderhorse and PAGI
+
+Thunderhorse is a layer built around L<PAGI> spec, so it requires at least some
+PAGI knowledge to use effectively. L<PAGI::Tutorial> may be a good starting
+point, but it contains more than required to build functional Thunderhorse
+applications. Here's the bare minimum to get you started:
+
+=over
+
+=item
+
+Each PAGI app is a plain C<async sub>, while Thunderhorse app is a blessed
+object. Thunderhorse apps have a C<run> method, which returns a PAGI app when
+called. This app is an entry point for all web requests.
+
+=item
+
+PAGI webapps need a bootstrapping script, like C<app.pl>. This script prepares
+the app for the server. App obtained from C<run> method must be returned by the
+script. This is usually achieved by putting C<< $app->run >> method call as
+the very last operation in the file.
+
+=item
+
+Scripts must be called using C<pagi-server> (or other PAGI-specific software).
+Running the script using C<perl> does nothing, as the application cannot run
+itself - it will be built, but it will not set up a webserver.
+
+=back
+
 =head2 The application class
 
 Each Thunderhorse application is required to define an application class, which
