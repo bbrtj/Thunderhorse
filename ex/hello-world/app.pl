@@ -2,13 +2,13 @@ use v5.40;
 
 package HelloApp;
 
-use Mooish::Base -standard;
+use Mooish::Base;
 extends 'Thunderhorse::App';
 
 sub build ($self)
 {
 	$self->router->add(
-		'/hello/?msg' => {
+		'/?msg' => {
 			to => sub ($self, $ctx, $msg) {
 				return "Hello, $msg";
 			},

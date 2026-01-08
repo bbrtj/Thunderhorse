@@ -2,7 +2,7 @@ use v5.40;
 
 package WebsocketApp;
 
-use Mooish::Base -standard;
+use Mooish::Base;
 use Future::AsyncAwait;
 
 extends 'Thunderhorse::App';

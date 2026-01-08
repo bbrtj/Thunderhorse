@@ -1,7 +1,7 @@
 package ControllerApp;
 
 use v5.40;
-use Mooish::Base -standard;
+use Mooish::Base;
 
 extends 'Thunderhorse::App';
 

@@ -1,7 +1,7 @@
 package ControllerApp::Controller::Clock;
 
 use v5.40;
-use Mooish::Base -standard;
+use Mooish::Base;
 
 extends 'Thunderhorse::Controller';
 
@@ -10,7 +10,7 @@ sub build ($self)
 	my $r = $self->router;
 
 	$r->add(
-		'/clock' => {
+		'/' => {
 			to => 'show_clock',
 		}
 	);

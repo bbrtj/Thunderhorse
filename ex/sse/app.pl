@@ -2,7 +2,7 @@ use v5.40;
 
 package SSEApp;
 
-use Mooish::Base -standard;
+use Mooish::Base;
 use Future::AsyncAwait;
 
 extends 'Thunderhorse::App';
@@ -21,7 +21,7 @@ sub build ($self)
 
 	$r->add(
 		'/stream' => {
-			action => 'sse.get',
+			action => 'sse.*',
 			to => 'handle_sse',
 		}
 	);
