@@ -1,0 +1,112 @@
+#!/usr/bin/env perl
+
+use v5.40;
+use Gears::Generator;
+
+use Getopt::Long;
+use Pod::Usage;
+use Path::Tiny qw(path);
+use List::Util qw(first);
+use File::Spec;
+
+use constant EX_DIR => path(__FILE__)->parent->parent->child('ex');
+
+my $generate;
+my $tabs = false;
+my $help = false;
+
+GetOptions(
+	'g|generate=s' => \$generate,
+	't|tabs' => \$tabs,
+	'h|help' => \$help,
+) or $help = true;
+
+my $target = shift
+	or $help
+	or do { warn "no target specified\n"; $help = true };
+
+# check one of the actions
+defined $generate
+	or $help
+	or do { warn "no action specified\n"; $help = true };
+
+pod2usage(1)
+	if $help;
+
+# handle actions
+if (defined $generate) {
+	my $generator = Gears::Generator->new(base_dir => EX_DIR);
+	my $namespace = get_template_namespace($generator, $generate);
+
+	if (defined $namespace) {
+		my $file = File::Spec->join(split /::/, $namespace);
+		my $target_file = File::Spec->join(split /::/, $target);
+
+		push $generator->name_filters->@*, sub ($name) {
+			return $name =~ s{\Q$file\E}{$target_file}r;
+		};
+
+		push $generator->content_filters->@*, sub ($content) {
+			return $content =~ s{\b\Q$namespace\E}{$target}rg;
+		};
+	}
+
+	$generator->generate($generate, '.');
+	say 'done.';
+}
+
+sub get_template_namespace ($generator, $template)
+{
+	my $files = $generator->get_template($template);
+	my $app_file = first { $_ =~ /app\.pl$/ } $files->@*;
+
+	return undef unless defined $app_file;
+	my $app_file_content = $app_file->slurp;
+
+	return $1
+		if $app_file_content =~ /^package ([\w:]+)/m;
+
+	return $1
+		if $app_file_content =~ /^\s*([\w:]+)->new/m;
+
+	return undef;
+}
+
+__END__
+
+=head1 NAME
+
+thunderhorse - manage Thunderhorse projects
+
+=head1 SYNOPSIS
+
+	thunderhorse [OPTIONS] TARGET
+
+=head1 OPTIONS
+
+=over
+
+=item -g EXAMPLE, --generate=EXAMPLE
+
+Copies one of the Thunderhorse examples into C<TARGET> (which is a Perl
+namespace). Example:
+
+	thunderhorse -g full-app My::App
+
+=item -t, --tabs
+
+When paired with C<--generate>, causes the generated application to use tabs
+for indenting instead of spaces.
+
+=item -h, --help
+
+Shows this help message.
+
+=back
+
+=head1 DESCRIPTION
+
+This program manages Thunderhorse projects. Must be used in a directory which
+contains (or will contain) a Thunderhorse application. Currently, it only
+supports generating new project directory structures based on examples.
+
