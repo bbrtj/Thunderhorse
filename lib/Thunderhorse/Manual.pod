@@ -82,6 +82,70 @@ itself - it will be built, but it will not set up a webserver.
 
 =back
 
+=head2 The thunderhorse script
+
+The C<thunderhorse> script is a command-line utility for managing Thunderhorse
+projects. It can be used to build new Thunderhorse projects or to inspect
+existing ones.
+
+The script can generate new applications from examples included with
+Thunderhorse distribution (in the C<ex> directory):
+
+	# simple application
+	thunderhorse --generate hello-world My::App
+
+	# advanced application
+	thunderhorse --generate full-app My::App
+
+This creates a complete application structure with all necessary files in the
+current directory. Simple one-file examples like C<hello-world>, C<websocket>
+or C<sse> can be useful for quick prototyping. C<full-app> is a full
+application ready for serious development with the proposed standard directory
+structure:
+
+=over
+
+=item * C<app.pl> - application bootstrap script
+
+=item * C<lib/> - Perl code
+
+=item * C<conf/> - configuration files
+
+=item * C<views/> - HTML templates
+
+=item * C<t/> - tests
+
+=back
+
+After generating, the script can be used to inspect projects:
+
+=over
+
+=item * showing current configuration
+
+The following command gathers and dumps system configuration:
+
+	thunderhorse --show-config app.pl
+
+By default, production configuration is shown. Set C<PAGI_ENV> to
+C<development> to show dev configuration:
+
+	PAGI_ENV=development thunderhorse --show-config app.pl
+
+=item * showing installed system locations
+
+The following command gathers and dumps router locations:
+
+	thunderhorse --show-locations app.pl
+
+The list of locations will be sorted in the order in which they are matched.
+Nested arrays in the list will be used when a bridge is encountered.
+
+=back
+
+Note that C<thunderhorse> script does not actually run the applications - use
+C<pagi-server> for that.
+
 =head2 The application class
 
 Each Thunderhorse application is required to define an application class, which
