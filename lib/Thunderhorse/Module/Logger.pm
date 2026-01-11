@@ -75,7 +75,7 @@ controllers.
 
 =head1 CONFIGURATION
 
-Configuration is passed to L<Gears::Logger::Handler>, which handles the actual
+Configuration is passed to C<Gears::Logger::Handler>, which handles the actual
 logging using L<Log::Handler>. Common configuration keys:
 
 =over
@@ -103,7 +103,7 @@ case C<log_format> must be set to C<undef> to avoid an exception on startup.
 	$self->log(error => 'Something went wrong');
 
 Logs a message at the specified level. Returns the controller instance for
-method chaining. Accepts the same arguments as L<Gears::Logger::Handler>'s
+method chaining. Accepts the same arguments as C<Gears::Logger::Handler>'s
 C<message> method.
 
 =head2 Hooks

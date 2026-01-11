@@ -70,7 +70,7 @@ L<Template::Toolkit>. It adds a L</render> method to controllers.
 
 =head1 CONFIGURATION
 
-Configuration is passed to L<Gears::Template::TT>, which wraps Template
+Configuration is passed to C<Gears::Template::TT>, which wraps Template
 Toolkit.
 
 =over

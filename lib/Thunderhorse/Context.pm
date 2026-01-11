@@ -187,7 +187,7 @@ constructor arguments.
 
 =head3 stash
 
-Delegated method for L<Thunderhorse::Request/stash>
+Delegated method for L<PAGI::Request/stash>
 
 =head3 scope
 

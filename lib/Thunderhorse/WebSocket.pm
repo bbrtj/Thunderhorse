@@ -50,7 +50,7 @@ integrates with L<Thunderhorse::Context>. It provides a high-level API for
 WebSocket connections including typed send/receive methods, connection state
 tracking, and cleanup callbacks.
 
-This class extends L<PAGI::Websocket> and mixes in C<Thunderhorse::Message> to
+This class extends L<PAGI::WebSocket> and mixes in C<Thunderhorse::Message> to
 provide context integration.
 
 =head1 INTERFACE

@@ -722,7 +722,7 @@ Loading the module:
 		],
 	});
 
-Configuration is passed to L<Gears::Logger::Handler>, which handles the actual
+Configuration is passed to C<Gears::Logger::Handler>, which handles the actual
 logging using L<Log::Handler>. Common configuration keys:
 
 =over
@@ -768,7 +768,7 @@ Loading the module:
 		},
 	});
 
-Configuration is passed to L<Gears::Template::TT>, which wraps Template
+Configuration is passed to C<Gears::Template::TT>, which wraps Template
 Toolkit.
 
 =over
