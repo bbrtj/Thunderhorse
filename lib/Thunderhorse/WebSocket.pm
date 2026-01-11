@@ -25,3 +25,65 @@ sub update ($self)
 	$self->{send} = $pagi->[2];
 }
 
+__END__
+
+=head1 NAME
+
+Thunderhorse::WebSocket - WebSocket wrapper for Thunderhorse
+
+=head1 SYNOPSIS
+
+	async sub handle ($self, $ctx)
+	{
+		my $ws = $ctx->ws;
+		await $ws->accept;
+
+		await $ws->each_json(async sub ($data) {
+			await $ws->send_json({echo => $data});
+		});
+	}
+
+=head1 DESCRIPTION
+
+Thunderhorse::WebSocket is a thin wrapper around L<PAGI::WebSocket> that
+integrates with L<Thunderhorse::Context>. It provides a high-level API for
+WebSocket connections including typed send/receive methods, connection state
+tracking, and cleanup callbacks.
+
+This class extends L<PAGI::Websocket> and mixes in C<Thunderhorse::Message> to
+provide context integration.
+
+=head1 INTERFACE
+
+Inherits all interface from L<PAGI::WebSocket>, and adds the interface
+documented below.
+
+=head2 Attributes
+
+=head3 context
+
+The L<Thunderhorse::Context> object for this request (weakened).
+
+I<Required in the constructor>
+
+=head2 Methods
+
+=head3 new
+
+	$object = $class->new(%args)
+
+Standard Mooish constructor. Consult L</Attributes> section for available
+constructor arguments.
+
+=head3 update
+
+	$ws->update()
+
+Updates the internal PAGI scope, receiver, and sender from the context's PAGI
+tuple. Called automatically when the context's PAGI tuple changes via
+L<Thunderhorse::Context/set_pagi>.
+
+=head1 SEE ALSO
+
+L<Thunderhorse>, L<PAGI::WebSocket>, L<Thunderhorse::Context>
+

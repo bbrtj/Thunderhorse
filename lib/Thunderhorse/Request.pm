@@ -24,3 +24,61 @@ sub update ($self)
 	$self->{receive} = $pagi->[1];
 }
 
+__END__
+
+=head1 NAME
+
+Thunderhorse::Request - Request wrapper for Thunderhorse
+
+=head1 SYNOPSIS
+
+	async sub show ($self, $ctx, $id)
+	{
+		my $param = $ctx->req->param('name');
+		my $method = $ctx->req->method;
+		my $body = await $ctx->req->json;
+	}
+
+=head1 DESCRIPTION
+
+Thunderhorse::Request is a thin wrapper around L<PAGI::Request> that integrates
+with L<Thunderhorse::Context>. It provides access to all HTTP request data
+including headers, query parameters, cookies, and request body.
+
+This class extends L<PAGI::Request> and mixes in C<Thunderhorse::Message> to
+provide context integration.
+
+=head1 INTERFACE
+
+Inherits all interface from L<PAGI::Request>, and
+adds the interface documented below.
+
+=head2 Attributes
+
+=head3 context
+
+The L<Thunderhorse::Context> object for this request (weakened).
+
+I<Required in the constructor>
+
+=head2 Methods
+
+=head3 new
+
+	$object = $class->new(%args)
+
+Standard Mooish constructor. Consult L</Attributes> section for available
+constructor arguments.
+
+=head3 update
+
+	$req->update()
+
+Updates the internal PAGI scope and receiver from the context's PAGI tuple.
+Called automatically when the context's PAGI tuple changes via
+L<Thunderhorse::Context/set_pagi>.
+
+=head1 SEE ALSO
+
+L<Thunderhorse>, L<PAGI::Request>, L<Thunderhorse::Context>
+
