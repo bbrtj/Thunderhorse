@@ -32,3 +32,91 @@ sub build ($self)
 	);
 }
 
+__END__
+
+=head1 NAME
+
+Thunderhorse::Module::Template - Template module for Thunderhorse
+
+=head1 SYNOPSIS
+
+	# in application build method
+	$self->load_module('Template' => {
+		paths => ['views'],
+		conf => {
+			EVAL_PERL => true,
+		},
+	});
+
+	# in controller method
+	sub show_page ($self, $ctx)
+	{
+		return $self->render('page', {
+			title => 'My Page',
+			content => 'Hello, World!',
+		});
+	}
+
+	# render from DATA handle
+	sub render_data ($self, $ctx)
+	{
+		return $self->render(\*DATA);
+	}
+
+=head1 DESCRIPTION
+
+The Template module adds template rendering capabilities using
+L<Template::Toolkit>. It adds a L</render> method to controllers.
+
+=head1 CONFIGURATION
+
+Configuration is passed to L<Gears::Template::TT>, which wraps Template
+Toolkit.
+
+=over
+
+=item * C<conf> - hash of Template::Toolkit configuration values
+
+=item * C<paths> - array ref of paths to search for templates
+
+=item * C<encoding> - encoding of template files, UTF-8 by default
+
+=back
+
+C<paths> and C<encoding> will be automatically set as proper keys in
+Template::Toolkit config, unless it was specified there separately, in which
+case they will be ignored.
+
+=head1 ADDED INTERFACE
+
+=head2 Controller Methods
+
+=head3 render
+
+	$self->render('page', { title => 'My Page' });
+	$self->render(\*DATA);
+	$self->render(\$template_string);
+
+Renders a template and returns the rendered content. The first argument is the
+template name (C<.tt> suffix will be added automatically), and the second is a
+hash reference of variables to pass to the template. The method returns the
+rendered content, which is then sent to the client as HTML (if the context is
+not already consumed).
+
+If the first argument is passed as a reference, the behavior changes:
+
+=over
+
+=item * for GLOB refs, filehandle will be read and its contents will be used as the template
+
+=item * for SCALAR refs, the referenced scalar will be used as the template
+
+=back
+
+GLOB refs will be rolled back after reading them automatically, making it
+useful for rendering from C<DATA> handles.
+
+=head1 SEE ALSO
+
+L<Thunderhorse::Module>, L<Gears::Template>
+
