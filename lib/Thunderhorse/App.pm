@@ -312,9 +312,9 @@ Thunderhorse::App - Base application class for Thunderhorse
 
 =head1 SYNOPSIS
 
-	use v5.40;
-
 	package MyApp;
+
+	use v5.40;
 	use Mooish::Base;
 
 	extends 'Thunderhorse::App';
@@ -338,11 +338,18 @@ applications. It extends L<Gears::App> and provides all core functionality
 needed to build PAGI web applications, including routing, configuration
 management, controller loading, and request handling.
 
-Every Thunderhorse application must be a subclass of this class.
+Every Thunderhorse application must be a subclass of this class. Method
+L<Gears::Component/build> can be overridden to bootstrap the application.
+Similar method L<Gears::Component/configure> is called before C<build>, but is
+used internally by the application, so the C<SUPER> version must be called if
+it is overridden. Method C<late_configure> works like C<configure> but is
+executed B<after> C<build>. This must also call the C<SUPER> version if
+overridden, since it is used to load controllers from configuration.
 
 =head1 INTERFACE
 
-Inherits all interface from L<Gears::App>, and adds the interface documented below.
+Inherits all interface from L<Gears::App> and L<Gears::Component>, and adds the
+interface documented below.
 
 =head2 Attributes
 
@@ -390,21 +397,6 @@ I<Not available in constructor>
 
 Standard Mooish constructor. Consult L</Attributes> section for available
 constructor arguments.
-
-=head3 build
-
-	sub build ($self) { ... }
-
-Override this method to define routes and configure the application. Called
-automatically during object construction.
-
-=head3 configure
-
-	$self->configure()
-
-Loads configuration files and modules. Called automatically during
-construction. Should not be called by hand, but can be overridden if some tasks
-need configuring before L</build>.
 
 =head3 run
 
