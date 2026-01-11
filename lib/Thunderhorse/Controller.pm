@@ -9,6 +9,15 @@ use URI;
 extends 'Gears::Controller';
 with 'Thunderhorse::Autoloadable';
 
+has extended 'app' => (
+	handles => [
+		qw(
+			loop
+			config
+		)
+	],
+);
+
 sub make_facade ($self, $ctx)
 {
 	return Thunderhorse::Context::Facade->new(context => $ctx);
@@ -52,7 +61,7 @@ sub abs_url ($self, $url = '')
 {
 	return URI->new_abs(
 		$url,
-		$self->app->config->get('app_url', 'http://localhost:5000'),
+		$self->config->get('app_url', 'http://localhost:5000'),
 	)->as_string;
 }
 
